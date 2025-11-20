@@ -1,0 +1,149 @@
+/* === โค้ดเดิมของคุณ (สำหรับการตั้งค่าพื้นฐาน) === */
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center; /* เปลี่ยนจาก place-items เพื่อจัดกลางแนวนอน */
+  padding: 2rem 1rem; /* เพิ่ม padding รอบนอก */
+  min-height: 100vh;
+  box-sizing: border-box; /* เพิ่มเพื่อการคำนวณขนาดที่ง่ายขึ้น */
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+h1 {
+  font-size: 2.5em; /* ปรับขนาดให้เล็กลงเล็กน้อย */
+  line-height: 1.1;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* === โค้ดใหม่ที่เพิ่มเข้ามาสำหรับฟอร์ม === */
+
+/* การ์ดหลักที่หุ้มฟอร์ม */
+.slip-container {
+  width: 100%;
+  max-width: 800px; /* จำกัดความกว้างสูงสุดของฟอร์ม */
+  background-color: #2f2f2f; /* สีพื้นหลังของการ์ด (เข้มกว่าพื้นหลังเว็บเล็กน้อย) */
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+}
+
+/* หัวข้อย่อย (เช่น สร้างสลิปเงินเดือน, ข้อมูลพนักงาน) */
+h2 {
+  font-size: 1.8em;
+  color: #ffffff;
+  border-bottom: 2px solid #646cff; /* เส้นใต้สีม่วง */
+  padding-bottom: 0.5rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+/* หัวข้อกลุ่ม (เช่น รายการได้, รายการหัก) */
+h3 {
+  font-size: 1.3em;
+  color: #e0e0e0;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* ข้อความอธิบาย (เช่น กรอกข้อมูล...) */
+.description {
+  color: #b0b0b0;
+  margin-bottom: 2rem;
+  font-size: 0.95em;
+}
+
+/* กลุ่มของ Label และ Input */
+.form-group {
+  display: flex;
+  flex-direction: column; /* จัดเรียง Label ให้อยู่บน Input */
+  margin-bottom: 1.25rem;
+}
+
+/* ป้ายกำกับ (Label) */
+label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #c0c0c0; /* สีเทาอ่อนสำหรับป้ายกำกับ */
+  font-size: 0.9em;
+}
+
+/* ช่องกรอกข้อมูล (Input) */
+input[type="text"],
+input[type="number"],
+input[type="date"] {
+  background-color: #3a3a3a; /* พื้นหลังช่องกรอก */
+  border: 1px solid #555;
+  border-radius: 8px;
+  padding: 0.75em 1em;
+  font-size: 1em;
+  color: #ffffff; /* สีตัวอักษรเวลาพิมพ์ */
+  outline: none; /* ลบเส้นขอบสีฟ้าเวลาคลิก */
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+/* สไตล์เมื่อคลิกที่ช่องกรอก */
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus {
+  border-color: #646cff; /* เปลี่ยนสีขอบเป็นสีม่วง */
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.3); /* เพิ่มเงาเรืองแสง */
+}
+
+/* สไตล์สำหรับช่องที่ถูกปิดใช้งาน (Disabled/Readonly) */
+input:disabled,
+input:read-only {
+  background-color: #404040;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+/* (ทางเลือก) สำหรับจัดกลุ่ม Input ให้อยู่ในแถวเดียวกัน */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* ทำให้ยืดหยุ่นตามขนาดจอ */
+  gap: 1rem;
+}
