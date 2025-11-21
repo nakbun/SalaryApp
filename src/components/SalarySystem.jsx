@@ -86,8 +86,6 @@ const SalarySystem = () => {
         setLoading(true);
         setError(null);
         
-        console.log("🔍 Fetching data with filters:", filters);
-        
         try {
             const params = new URLSearchParams();
             
@@ -98,7 +96,6 @@ const SalarySystem = () => {
             });
 
             const url = `${API_URL}/api/salary-data?${params.toString()}`;
-            console.log("📡 API URL:", url);
 
             const response = await fetch(url, {
                 method: 'GET',
@@ -106,26 +103,21 @@ const SalarySystem = () => {
                     'Content-Type': 'application/json',
                 }
             });
-            
-            console.log("📥 Response status:", response.status);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
-            console.log("✅ API Response:", data);
             
             if (data.status === "success") {
                 // ใช้ข้อมูลจาก Backend โดยตรง (เรียงลำดับที่ Backend แล้ว)
                 setResults(data.data || []);
                 setCurrentPage(1);
-                console.log(`📊 Found ${data.count} records`);
             } else {
                 throw new Error(data.message || 'เกิดข้อผิดพลาดในการดึงข้อมูล');
             }
         } catch (err) {
-            console.error('❌ Error fetching data:', err);
             setError(err.message);
             setResults([]);
         } finally {
@@ -134,28 +126,20 @@ const SalarySystem = () => {
     };
 
     useEffect(() => {
-        console.log("🚀 Component mounted - Initial data fetch");
         fetchSalaryData();
         fetchAvailableFilters();
     }, []);
 
     const fetchAvailableFilters = async () => {
         try {
-            console.log("🔍 Fetching available filters...");
             const response = await fetch(`${API_URL}/api/available-filters`);
             const data = await response.json();
-            
-            console.log("📅 Available filters response:", data);
             
             if (data.status === "success") {
                 setAvailableMonths(data.months || []);
                 setAvailableYears(data.years || []);
-                console.log(`✅ Loaded ${data.months?.length || 0} months and ${data.years?.length || 0} years`);
-            } else {
-                console.error("❌ Failed to fetch filters:", data.message);
-            }
+            } 
         } catch (err) {
-            console.error("❌ Error fetching filters:", err);
         }
     };
 
@@ -174,7 +158,6 @@ const SalarySystem = () => {
                 filters.employee = "ลูกจ้างเงินเดือน";
             }
             
-            console.log("⏱️ Debounced search triggered with filters:", filters);
             fetchSalaryData(filters);
         }, 300);
 
@@ -182,19 +165,17 @@ const SalarySystem = () => {
     }, [searchForm, activeTab]);
 
     const handleSearchChange = (field, value) => {
-        console.log(`📝 Search field changed: ${field} = "${value}" (type: ${typeof value})`);
         setSearchForm({ ...searchForm, [field]: value });
     };
 
     const handleReset = () => {
-        console.log("🔄 Resetting search form");
+
         setSearchForm({ cid: "", name: "", month: "", year: "" });
         setActiveTab("all");
         setCurrentPage(1);
     };
 
     const handleTabChange = (tab) => {
-        console.log(`📑 Tab changed to: ${tab}`);
         setActiveTab(tab);
         setCurrentPage(1);
     };
@@ -370,7 +351,7 @@ const SalarySystem = () => {
                                             />
                                         </div>
                                         <div className="dropdown-name">{currentUser.name}</div>
-                                        <div className="dropdown-position">{currentUser.position}</div>
+                                        <div className="dropdown-position">{currentUser.status}</div>
                                     </div>
                                     <div className="dropdown-body">
                                         <div className="dropdown-item">
@@ -531,7 +512,7 @@ const SalarySystem = () => {
                                         <th>ลำดับ</th>
                                         <th>ชื่อ-นามสกุล</th>
                                         <th>ประเภท</th>
-                                        <th>เลขบัตรประชาชน</th>
+                                        <th>เลขประจำตัว</th>
                                         <th>เลขที่บัญชี</th>
                                         <th>เดือน</th>
                                         <th>ปี</th>

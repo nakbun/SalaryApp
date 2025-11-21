@@ -88,7 +88,7 @@ export default function AddSalary() {
         setMessage("");
 
         setTimeout(() => {
-          window.location.href = "/";
+          window.location.href = "/home";
         }, 3000);
 
       } else {

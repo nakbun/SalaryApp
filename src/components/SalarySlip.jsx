@@ -206,7 +206,7 @@ const SalarySlip = () => {
                         <span className="value-mini">{employee.employee || '-'}</span>
                     </div>
                     <div className="info-row-mini">
-                        <span className="label-mini">บัตรปชช:</span>
+                        <span className="label-mini">เลขประจำตัว:</span>
                         <span className="value-mini">{employee.cid || '-'}</span>
                     </div>
                     <div className="info-row-mini">

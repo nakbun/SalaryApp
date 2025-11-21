@@ -422,12 +422,13 @@ body {
   gap: 0.75rem;
 }
 
-/* Form Grid */
+/* Form Grid - จัดให้กระจายเท่าๆ กัน */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
+  grid-template-columns: 1fr 1fr;  /* แบ่งเป็น 2 คอลัมน์เท่ากัน */
+  gap: 30px;  /* เว้นระยะระหว่างกล่อง */
+  padding: 0 80px;  /* เว้นระยะจากขอบซ้าย-ขวา */
+}   
 
 /* Form Group */
 .form-group {

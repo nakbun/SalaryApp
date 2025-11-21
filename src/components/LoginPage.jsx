@@ -41,7 +41,7 @@ export default function LoginPage() {
         sessionStorage.setItem('currentUser', JSON.stringify({
           cid: data.user.cid,
           name: data.user.name,
-          position: data.user.position
+          status: data.user.status
         }));
 
         // แสดง animation สำเร็จก่อน redirect
@@ -56,7 +56,6 @@ export default function LoginPage() {
       setLoading(false);
     } catch (err) {
       setError('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
-      console.error('Login error:', err);
       setLoading(false);
     }
   };
@@ -87,7 +86,7 @@ export default function LoginPage() {
 
           {error && (
             <div className="error-message">
-              ⚠️ {error}
+              ⚠️ {error} !
             </div>
           )}
 
