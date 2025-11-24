@@ -302,12 +302,6 @@ def register():
                 "message": "กรุณากรอกข้อมูลให้ครบถ้วน"
             }), 400
         
-        if len(cid) != 13:
-            return jsonify({
-                "status": "error",
-                "message": "CID ต้องมี 13 หลัก"
-            }), 400
-        
         # Hash password
         hashed_pwd = hash_password(password)
         
