@@ -46,7 +46,7 @@ COLUMN_MAP = {
     'P4P': 'pay_for_performance',
     'โควิด-19': 'covid_risk_pay',
     'เพิ่มโควิด-19': 'covid_risk_pay',
-    'เสี่ยงภัยโควิด': 'covid_risk_pay',
+    'เสี่ยงภัยโควิด': 'covid_exposure',
     'เงินกู้สวัสดิการ': 'welfare_loan_received',
     'โอที': 'overtime_pay',
     'บ่าย-ดึก': 'evening_night_shift_pay',
@@ -70,6 +70,7 @@ COLUMN_MAP = {
     'ฌกส.': 'funeral_welfare_deduction',
     'สอ.กรม': 'coop_deduction_dept',
     'สอ.สสจ.เลย': 'coop_deduction_phso',
+    'สสจ.': 'prov_health_office',
     'กยศ.': 'student_loan_deduction_emp',
     'กยศ': 'student_loan_deduction_emp',
     'ค่าน้ำ': 'water_bill_deduction',
@@ -85,7 +86,7 @@ COLUMN_MAP = {
     'กรุงไทย': 'ktb_loan_deduction_emp',
     'ธนาคารกรุงไทย': 'ktb_loan_deduction_emp',
     'เงินกู้ รพ.': 'hospital_loan_deduction',
-    'เงินกู้ รพ/ประกันงาน': 'hospital_loan_deduction',
+    'เงินกู้ รพ/ประกันงาน': 'hospital_loan_employment',    
     'การศึกษาบุตร': 'child_education_deduction',
     'ค่ารักษาพยาบาล': 'medical_expense_deduction',
     'ไม่ปฏิบัติเวช': 'no_private_practice_deduction',
@@ -104,7 +105,7 @@ NUMERIC_COLUMNS = {
     'coop_deduction_phso', 'student_loan_deduction_emp', 'water_bill_deduction',
     'electricity_bill_deduction', 'internet_deduction_emp', 'aia_insurance_deduction_emp',
     'gsb_loan_deduction_emp', 'gsb_loan_naan', 'gsb_loan_loei', 'ghb_loan_deduction',
-    'ktb_loan_deduction_emp', 'hospital_loan_deduction', 'child_education_deduction',
+    'ktb_loan_deduction_emp', 'hospital_loan_deduction','hospital loan_employment', 'child_education_deduction',
     'medical_expense_deduction', 'no_private_practice_deduction'
 }
 
@@ -248,16 +249,17 @@ def clean_cid(value: Any) -> Optional[str]:
 
 
 def clean_year(value: Any) -> Optional[int]:
-    """Clean and validate year"""
+    """Clean and validate year - keep as Buddhist Era (พ.ศ.)"""
     if value is None or value == '' or pd.isna(value):
         return None
     
     try:
         year = int(float(str(value).replace(',', '').strip()))
         
-        # แปลง พ.ศ. เป็น ค.ศ. ถ้าเป็นปี 2500+
-        if year > 2500:
-            year = year - 543
+        # ✅ เก็บเป็น พ.ศ. ตามที่รับเข้ามา (ไม่แปลงเป็น ค.ศ.)
+        # ถ้าเป็นปี ค.ศ. (เช่น 2024) ให้แปลงเป็น พ.ศ.
+        if year < 2500:
+            year = year + 543
             
         return year
     except:
@@ -871,7 +873,7 @@ def upload_api():
             # Remove excluded columns
             df = df[[c for c in df.columns if c not in EXCLUDE_COLUMNS]]
             
-            # Map column names
+            # ✅ Map column names และรวมคอลัมน์ที่ซ้ำกัน
             mapped_cols = []
             for c in df.columns:
                 key = str(c).strip()
@@ -881,17 +883,57 @@ def upload_api():
             
             df.columns = mapped_cols
             
-            # Handle duplicate columns
-            final_cols = []
-            seen = {}
-            for c in df.columns:
-                if c not in seen:
-                    seen[c] = 1
-                    final_cols.append(c)
+            # 🔧 รวมคอลัมน์ที่มีชื่อซ้ำกัน (แทนการแยกเป็น _1, _2)
+            duplicate_cols = {}
+            for col in df.columns:
+                if col not in duplicate_cols:
+                    duplicate_cols[col] = []
+                duplicate_cols[col].append(col)
+            
+            # สร้าง DataFrame ใหม่โดยรวมค่าของคอลัมน์ซ้ำ
+            merged_df = pd.DataFrame()
+            processed_cols = set()
+            
+            for col in df.columns:
+                if col in processed_cols:
+                    continue
+                    
+                # หาคอลัมน์ทั้งหมดที่ชื่อเดียวกัน
+                same_name_cols = [c for i, c in enumerate(df.columns) if df.columns[i] == col]
+                
+                if len(same_name_cols) > 1:
+                    # ✅ รวมค่าจากหลายคอลัมน์ (เลือกค่าที่ไม่ใช่ null/empty)
+                    combined_values = []
+                    for idx in range(len(df)):
+                        values = []
+                        for sc in same_name_cols:
+                            val = df.iloc[idx][sc]
+                            if val not in [None, '', ' '] and not pd.isna(val):
+                                # ถ้าเป็นตัวเลข ให้รวมกัน
+                                if col in NUMERIC_COLUMNS:
+                                    try:
+                                        values.append(convert_to_decimal(val) or 0)
+                                    except:
+                                        pass
+                                else:
+                                    values.append(val)
+                        
+                        # สำหรับ numeric columns ให้รวมค่า
+                        if col in NUMERIC_COLUMNS and values:
+                            combined_values.append(sum(values))
+                        # สำหรับ text columns ให้เอาค่าแรกที่ไม่ว่าง
+                        elif values:
+                            combined_values.append(values[0])
+                        else:
+                            combined_values.append(None)
+                    
+                    merged_df[col] = combined_values
                 else:
-                    final_cols.append(f"{c}_{seen[c]}")
-                    seen[c] += 1
-            df.columns = final_cols
+                    merged_df[col] = df[col]
+                
+                processed_cols.add(col)
+            
+            df = merged_df
             
             # Clean column names
             df.columns = [clean_column_name(c) for c in df.columns]
@@ -945,7 +987,6 @@ def upload_api():
             os.remove(path)
         except:
             pass
-
 
 # ============================================================================
 #                          MAIN

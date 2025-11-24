@@ -519,7 +519,7 @@ const SalarySystem = () => {
                                         <th>รวมรับ (บาท)</th>
                                         <th>รวมจ่าย (บาท)</th>
                                         <th>เงินได้สุทธิ (บาท)</th>
-                                        <th>จัดการ</th>
+                                        <th>พิมพ์</th>
                                     </tr>
                                 </thead>
                                 <tbody>

@@ -72,7 +72,7 @@ export default function LoginPage() {
           <div className="brand-logo">
             <img src="/img/image-Photoroom (1).png" alt="Hospital Logo" className="logo-login"></img>
           </div>
-          <h1 className="brand-title">ระบบออกสลิปเงินเดือนบุคลากร</h1>
+          <h1 className="brand-title">ระบบสลิปเงินเดือนบุคลากร</h1>
           <p className="brand-subtitle">เข้าสู่ระบบเพื่อเริ่มต้นประสบการณ์ที่ยอดเยี่ยม</p>
           <div className="decorative-line"></div>
         </div>
@@ -101,7 +101,7 @@ export default function LoginPage() {
                 id="cid"
                 value={cid}
                 onChange={(e) => setCid(e.target.value)}
-                placeholder="กรอกเลขประจำตัวของคุณ"
+                placeholder="กรอกเลขประจำตัว"
                 className="input"
                 maxLength="13"
                 disabled={loading}
@@ -119,7 +119,7 @@ export default function LoginPage() {
                   id="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="กรอกรหัสผ่านของคุณ"
+                  placeholder="กรอกรหัสผ่าน"
                   className="input password-input"
                   onKeyPress={(e) => e.key === 'Enter' && !loading && handleSubmit()}
                   disabled={loading}
