@@ -190,7 +190,7 @@
     font-weight: 600;
 }
 
-/* Grid สำหรับแสดงบนหน้าจอ (3x3) */
+/* Grid สำหรับแสดงบนหน้าจอ (3x3 = 9 กล่อง) */
 .slips-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -249,54 +249,7 @@
     transform: scale(1.1);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
 }
-/* ===============================
-   แก้ปัญหา Modal บีบ layout
-   =============================== */
 
-/* ทำให้ modal กว้างพอสำหรับ layout แนวนอน */
-.modal-content {
-    width: 90% !important;
-    max-width: 800px !important;
-    padding: 20px 30px !important;
-}
-
-/* ตัว wrapper ห้ามบีบ */
-.modal-slip-wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-}
-
-/* ตัว slip ต้องไม่ถูกบีบ */
-.modal-slip-wrapper .salary-slip-mini {
-    width: 100% !important;
-}
-
-/* บังคับ slip-body ให้แสดงเป็น 2 คอลัมน์ */
-.modal-slip-wrapper .slip-body-mini {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: space-between;
-    gap: 25px;
-}
-
-/* คอลัมน์ซ้าย */
-.modal-slip-wrapper .employee-info-mini {
-    width: 90% !important;
-}
-
-/* คอลัมน์ขวา */
-.modal-slip-wrapper .salary-details-mini {
-    width: 90% !important;
-}
-
-/* ป้องกัน label กับ value ขึ้นบรรทัดใหม่ */
-.modal-slip-wrapper .info-row-mini,
-.modal-slip-wrapper .detail-row-mini {
-    display: flex;
-    justify-content: space-between;
-    white-space: nowrap;
-}
 /* Modal Close Button - ปุ่มปิดสีแดงสวยๆ */
 .modal-close-btn {
     position: absolute;
@@ -355,12 +308,42 @@
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 800px;
+    padding: 20px 30px;
 }
 
-/* Modal Styles - ขยายขนาด และบังคับให้เป็นแนวนอนเหมือนหน้าพิมพ์ */
+/* Modal Slip Wrapper */
+.modal-slip-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
 .modal-slip-wrapper .salary-slip-mini {
-    display: flex !important;
-    flex-direction: column !important;
+    width: 100%;
+}
+
+.modal-slip-wrapper .slip-body-mini {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 25px;
+}
+
+.modal-slip-wrapper .employee-info-mini {
+    width: 90%;
+}
+
+.modal-slip-wrapper .salary-details-mini {
+    width: 90%;
+}
+
+.modal-slip-wrapper .info-row-mini,
+.modal-slip-wrapper .detail-row-mini {
+    display: flex;
+    justify-content: space-between;
+    white-space: nowrap;
 }
 
 /* Header Mini */
@@ -646,208 +629,6 @@
     font-size: 11px !important;
 }
 
-/* Print Styles */
-@media print {
-    body {
-        margin: 0;
-        padding: 0;
-        background: white;
-    }
-
-    .print-container {
-        max-width: 100%;
-        padding: 0;
-        background: white;
-        width: 100%;
-    }
-
-    .no-print {
-        display: none !important;
-    }
-
-    /* ซ่อนหน้าจอแสดงบนหน้าจอ */
-    .screen-only {
-        display: none !important;
-    }
-
-    /* แสดง print-all-pages ตอนพิมพ์ */
-    .print-all-pages {
-        display: block !important;
-        visibility: visible !important;
-    }
-
-    .print-page {
-        page-break-after: always;
-        page-break-inside: avoid;
-        padding: 10mm;
-        border: none;
-    }
-
-    .print-page:last-child {
-        page-break-after: auto;
-    }
-
-    /* Grid สำหรับโหมดพิมพ์ - 2 รายการต่อหน้าแบบบนล่าง */
-    .print-all-pages .slips-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 15mm;
-    }
-
-    /* สลิปในโหมดพิมพ์ */
-    .print-all-pages .salary-slip-mini {
-        display: flex !important;
-        flex-direction: column !important;
-        visibility: visible !important;
-        border: 2px solid #000 !important;
-        background: white !important;
-        page-break-inside: avoid !important;
-        padding: 15px !important;
-        margin-bottom: 0 !important;
-        font-size: 14px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-        box-shadow: none !important;
-    }
-
-    .print-all-pages .slip-header-mini {
-        display: flex !important;
-        padding-right: 0 !important;
-        gap: 10px !important;
-        padding-bottom: 10px !important;
-        margin-bottom: 15px !important;
-        border-bottom: 2px solid #3b82f6 !important;
-    }
-
-    .print-all-pages .hospital-logo-mini {
-        display: block !important;
-    }
-
-    .print-all-pages .hospital-logo-mini img {
-        width: 50px !important;
-        height: 50px !important;
-        display: block !important;
-    }
-
-    .print-all-pages .hospital-info-mini {
-        display: block !important;
-    }
-
-    .print-all-pages .hospital-info-mini h2 {
-        font-size: 16px !important;
-        display: block !important;
-        margin: 0 0 4px 0 !important;
-    }
-
-    .print-all-pages .hospital-info-mini p {
-        font-size: 12px !important;
-        display: block !important;
-        margin: 0 !important;
-    }
-
-    .print-all-pages .slip-body-mini {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 15px !important;
-    }
-
-    .print-all-pages .employee-info-mini {
-        padding: 10px !important;
-        margin-bottom: 0 !important;
-        display: block !important;
-        background: #f9fafb !important;
-        border-radius: 4px !important;
-        width: 90% !important;
-    }
-
-    .print-all-pages .info-row-mini {
-        display: flex !important;
-        padding: 5px 0 !important;
-        font-size: 13px !important;
-    }
-
-    .print-all-pages .info-row-mini .label-mini {
-        width: 90px !important;
-        font-size: 13px !important;
-    }
-
-    .print-all-pages .info-row-mini .value-mini {
-        font-size: 13px !important;
-        white-space: normal !important;
-    }
-
-    .print-all-pages .salary-details-mini {
-        margin-bottom: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 6px !important;
-    }
-
-    .print-all-pages .detail-row-mini {
-        display: flex !important;
-        justify-content: space-between !important;
-        padding: 8px 10px !important;
-        font-size: 13px !important;
-        border-radius: 4px !important;
-    }
-
-    .print-all-pages .detail-row-mini.income {
-        background: #dcfce7 !important;
-        color: #166534 !important;
-    }
-
-    .print-all-pages .detail-row-mini.expense {
-        background: #fee2e2 !important;
-        color: #991b1b !important;
-    }
-
-    .print-all-pages .net-balance-mini {
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        padding: 10px !important;
-        font-size: 14px !important;
-        background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%) !important;
-        color: white !important;
-        border-radius: 4px !important;
-        margin-top: auto !important;
-    }
-
-    .print-all-pages .net-amount-mini {
-        font-size: 16px !important;
-        font-weight: 800 !important;
-    }
-
-    .print-all-pages .slip-footer-mini {
-        padding-top: 10px !important;
-        margin-top: 15px !important;
-        border-top: 1px solid #e5e7eb !important;
-        text-align: center !important;
-        display: block !important;
-    }
-
-    .print-all-pages .slip-footer-mini p {
-        font-size: 11px !important;
-    }
-
-    @page {
-        size: A4 portrait;
-        margin: 10mm;
-    }
-
-    /* Force all elements to be visible */
-    .print-all-pages * {
-        visibility: visible !important;
-    }
-
-    /* But hide empty slots */
-    .print-all-pages .salary-slip-mini.empty-slot,
-    .salary-slip-mini.empty-slot {
-        display: none !important;
-        visibility: hidden !important;
-    }
-}
-
 /* --- บังคับให้ slip เป็นแนวนอน --- */
 .horizontal-layout .slip-body-mini {
     display: flex;
@@ -878,4 +659,330 @@
 .horizontal-layout .info-row-mini,
 .horizontal-layout .detail-row-mini {
     white-space: nowrap;
+}
+
+/* ========================================
+   RESPONSIVE - MOBILE
+   ======================================== */
+
+/* Tablet (768px and below) - แสดง 2 คอลัมน์ */
+@media screen and (max-width: 768px) {
+    .print-container {
+        width: 100%;
+        padding: 15px;
+    }
+    
+    .print-actions {
+        padding: 15px;
+        gap: 8px;
+    }
+    
+    .page-info {
+        margin-left: 0;
+        margin-right: 0;
+        font-size: 12px;
+    }
+    
+    .btn-print, .btn-back {
+        font-size: 14px;
+        padding: 10px 16px;
+    }
+    
+    .pagination-controls {
+        padding: 15px;
+    }
+    
+    .btn-page {
+        min-width: 80px;
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+    
+    .btn-page-number {
+        width: 38px;
+        height: 38px;
+        font-size: 13px;
+    }
+    
+    /* Tablet แสดง 2 คอลัมน์ */
+    .slips-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 5mm !important;
+    }
+}
+
+/* Mobile (480px and below) */
+@media screen and (max-width: 480px) {
+    .print-container {
+        padding: 10px;
+    }
+    
+    .print-actions {
+        flex-direction: column;
+        padding: 10px;
+        gap: 10px;
+    }
+    
+    .btn-print, .btn-back {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .page-info {
+        width: 100%;
+        max-width: none;
+        font-size: 11px;
+        margin: 0;
+    }
+    
+    /* Mobile แสดง 2 คอลัมน์ (6 กล่องต่อหน้า = 2x3) */
+    .slips-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 3mm !important;
+    }
+    
+    .pagination-controls {
+        padding: 10px;
+        gap: 4px;
+    }
+    
+    .btn-page {
+        min-width: 60px;
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+    
+    .btn-page-number {
+        width: 34px;
+        height: 34px;
+        font-size: 12px;
+    }
+    
+    .pagination-info {
+        font-size: 11px;
+    }
+    
+    /* Modal */
+    .modal-overlay {
+        padding: 10px;
+    }
+    
+    .modal-content {
+        width: 100%;
+        max-height: 85vh;
+        padding: 20px 15px;
+    }
+    
+    .modal-close-btn {
+        width: 36px;
+        height: 36px;
+        top: 10px;
+        right: 10px;
+    }
+    
+    .modal-close-btn svg {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .modal-slip-wrapper .slip-body-mini {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    
+    .modal-slip-wrapper .employee-info-mini,
+    .modal-slip-wrapper .salary-details-mini {
+        width: 100% !important;
+    }
+    
+    .modal-slip-wrapper .hospital-logo-mini img {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .modal-slip-wrapper .hospital-info-mini h2 {
+        font-size: 14px !important;
+    }
+    
+    .modal-slip-wrapper .hospital-info-mini p {
+        font-size: 11px !important;
+    }
+    
+    .salary-slip-mini {
+        padding: 6px;
+    }
+    
+    .slip-header-mini {
+        padding-right: 35px;
+    }
+    
+    .expand-btn {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .expand-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+}
+
+/* Small Mobile (360px and below) */
+@media screen and (max-width: 360px) {
+    .hospital-info-mini h2 {
+        font-size: 8px !important;
+    }
+    
+    .hospital-info-mini p {
+        font-size: 7px !important;
+    }
+    
+    .info-row-mini .label-mini {
+        width: 45px;
+    }
+    
+    .modal-slip-wrapper .info-row-mini .label-mini {
+        width: 70px !important;
+        font-size: 11px !important;
+    }
+    
+    .modal-slip-wrapper .info-row-mini .value-mini,
+    .modal-slip-wrapper .detail-row-mini {
+        font-size: 11px !important;
+    }
+    
+    /* Grid 2 คอลัมน์ (6 กล่องต่อหน้า = 2x3) */
+    .slips-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 2mm !important;
+    }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+@media print {
+    body {
+        margin: 0;
+        padding: 0;
+        background: white;
+    }
+
+    .print-container {
+        max-width: 100%;
+        padding: 0;
+        background: white;
+        width: 100%;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .screen-only {
+        display: none !important;
+    }
+
+    .print-all-pages {
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    .print-page {
+        page-break-after: always;
+        page-break-inside: avoid;
+        padding: 10mm;
+        border: none;
+    }
+
+    .print-page:last-child {
+        page-break-after: auto;
+    }
+
+    .print-all-pages .slips-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 15mm;
+    }
+
+    .print-all-pages .salary-slip-mini {
+        display: flex !important;
+        flex-direction: column !important;
+        visibility: visible !important;
+        border: 2px solid #000 !important;
+        background: white !important;
+        page-break-inside: avoid !important;
+        padding: 15px !important;
+        margin-bottom: 0 !important;
+        font-size: 14px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        box-shadow: none !important;
+    }
+
+    .print-all-pages .slip-header-mini {
+        display: flex !important;
+        padding-right: 0 !important;
+        gap: 10px !important;
+        padding-bottom: 10px !important;
+        margin-bottom: 15px !important;
+        border-bottom: 2px solid #3b82f6 !important;
+    }
+
+    .print-all-pages .hospital-logo-mini img {
+        width: 50px !important;
+        height: 50px !important;
+    }
+
+    .print-all-pages .hospital-info-mini h2 {
+        font-size: 16px !important;
+        margin: 0 0 4px 0 !important;
+    }
+
+    .print-all-pages .hospital-info-mini p {
+        font-size: 12px !important;
+    }
+
+    .print-all-pages .slip-body-mini {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 15px !important;
+    }
+
+    .print-all-pages .employee-info-mini {
+        padding: 10px !important;
+        width: 100% !important;
+    }
+
+    .print-all-pages .info-row-mini,
+    .print-all-pages .detail-row-mini {
+        font-size: 13px !important;
+        padding: 5px 0 !important;
+    }
+
+    .print-all-pages .info-row-mini .label-mini {
+        width: 90px !important;
+    }
+
+    .print-all-pages .net-balance-mini {
+        padding: 10px !important;
+        font-size: 14px !important;
+    }
+
+    .print-all-pages .net-amount-mini {
+        font-size: 16px !important;
+    }
+
+    .print-all-pages .slip-footer-mini p {
+        font-size: 11px !important;
+    }
+
+    .salary-slip-mini.empty-slot {
+        display: none !important;
+    }
+
+    @page {
+        size: A4 portrait;
+        margin: 10mm;
+    }
 }

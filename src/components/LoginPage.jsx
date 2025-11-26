@@ -131,7 +131,7 @@ export default function LoginPage() {
                   disabled={loading}
                 >
                   <img
-                    src={showPassword ? "/public/img/openeye.png" : "/public/img/closeeye.png"}
+                    src={showPassword ? "/img/openeye.png" : "/img/closeeye.png"}
                     alt="toggle password visibility"
                     className="eye-icon"
                   />

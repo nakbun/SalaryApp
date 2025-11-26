@@ -317,7 +317,7 @@ const SalarySystem = () => {
                             >
                                 <div className="profile-avatar">
                                     <img 
-                                        src="/public/img/people.png" 
+                                        src="/img/people.png" 
                                         alt="Profile"
                                         className="profile-icon"
                                         onError={(e) => {
@@ -340,7 +340,7 @@ const SalarySystem = () => {
                                     <div className="dropdown-header">
                                         <div className="dropdown-avatar">
                                             <img 
-                                                src="/public/img/people.png" 
+                                                src="/img/people.png" 
                                                 alt="Profile"
                                                 className="dropdown-icon"
                                                 onError={(e) => {

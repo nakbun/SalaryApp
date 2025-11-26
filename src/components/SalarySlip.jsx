@@ -63,7 +63,20 @@ const SalarySlip = () => {
         document.body.style.overflow = 'auto';
     };
 
-    const ITEMS_PER_PAGE = 9;
+    const [itemsPerPage, setItemsPerPage] = useState(
+        window.innerWidth <= 768 ? 6 : 9
+    );
+
+    useEffect(() => {
+        const handleResize = () => {
+            setItemsPerPage(window.innerWidth <= 768 ? 6 : 9);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const ITEMS_PER_PAGE = itemsPerPage;
     const ITEMS_PER_PAGE_PRINT = 2; // สำหรับพิมพ์ 2 รายการต่อหน้า
     const totalPages = Math.ceil(employees.length / ITEMS_PER_PAGE);
     const totalPrintPages = Math.ceil(employees.length / ITEMS_PER_PAGE_PRINT);

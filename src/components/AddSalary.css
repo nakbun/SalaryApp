@@ -498,3 +498,102 @@
     margin-top: 12px;
     color: #b91c1c;
 }
+
+/* ---------------------------------------------------------
+   RESPONSIVE MEDIA QUERIES
+   (วางส่วนนี้ไว้ล่างสุดของไฟล์ CSS)
+--------------------------------------------------------- */
+
+/* สำหรับหน้าจอที่เล็กกว่า 1100px (Tablet แนวนอน หรือ Laptop เล็ก) */
+@media screen and (max-width: 1100px) {
+    .upload-header {
+        width: 100%; /* แก้จาก 1000px เป็นเต็มจอ */
+        max-width: 100%;
+        padding: 0 20px;
+    }
+}
+
+/* สำหรับหน้าจอที่เล็กกว่า 768px (Tablet แนวตั้ง หรือ มือถือจอใหญ่) */
+@media screen and (max-width: 768px) {
+    .content-wrapper {
+        padding: 30px 20px; /* ลด padding ขอบข้าง */
+        width: 95%; /* ให้เหลือขอบนิดหน่อย */
+    }
+
+    .selection-grid {
+        flex-direction: column; /* เปลี่ยนการเรียง Form เป็นแนวตั้ง */
+        gap: 15px;
+    }
+
+    .header-title {
+        font-size: 28px; /* ลดขนาดฟอนต์หัวข้อ */
+    }
+
+    .upload-title {
+        font-size: 22px;
+    }
+    
+    /* ปรับปุ่ม Back Home */
+    .back-home-button {
+        position: relative; /* เลิกใช้ absolute เพื่อไม่ให้ทับเนื้อหา */
+        top: auto;
+        left: auto;
+        margin-bottom: 20px;
+        display: inline-block;
+    }
+
+    .salary-container {
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 0;
+    }
+}
+
+/* สำหรับหน้าจอที่เล็กกว่า 480px (มือถือทั่วไป) */
+@media screen and (max-width: 480px) {
+    .content-wrapper {
+        padding: 25px 15px;
+        width: 100%;
+        border-radius: 0; /* จอเล็กมากลบความโค้งออกให้เต็มจอ */
+        box-shadow: none;
+        background: rgba(255, 255, 255, 0.85); /* เพิ่มความทึบให้อ่านง่ายขึ้น */
+    }
+
+    .header-icon-wrapper {
+        width: 60px;
+        height: 60px;
+    }
+
+    .header-icon {
+        width: 30px;
+        height: 30px;
+    }
+
+    .header-subtitle {
+        font-size: 15px;
+    }
+
+    .upload-section {
+        padding: 20px; /* ลด padding ในกล่อง upload */
+    }
+
+    /* Modal Responsive */
+    .modal-content {
+        width: 90%; /* ให้ Modal กว้าง 90% ของจอ */
+        max-width: 430px;
+    }
+
+    .modal-count {
+        font-size: 40px;
+    }
+
+    .modal-title {
+        font-size: 20px;
+    }
+    
+    .modal-info-content {
+        flex-direction: column; /* เรียง icon กับ text ใน modal เป็นแนวตั้ง */
+        align-items: center;
+        text-align: center;
+    }
+}
