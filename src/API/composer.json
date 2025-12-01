@@ -1,0 +1,15 @@
+{
+    "name": "salaryapp/api",
+    "description": "Salary App API - PHP Backend",
+    "require": {
+        "php": ">=7.4",
+        "phpoffice/phpspreadsheet": "^1.29"
+    },
+    "autoload": {
+        "psr-4": {
+            "SalaryApp\\": "src/"
+        }
+    }
+}
+
+

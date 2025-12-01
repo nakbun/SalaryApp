@@ -19,10 +19,10 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Database Configuration
 DB_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': '#Bb108935',
-    'database': 'salary_db'
+    'host': '10.0.0.11',
+    'user': 'admintoy',
+    'password': 'Gotoyt@y1@y2522',
+    'database': 'hrd_salary'
 }
 
 # Column mappings

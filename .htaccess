@@ -1,0 +1,16 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /SalaryApp/src/API/
+    
+    # ถ้าไฟล์หรือโฟลเดอร์มีอยู่จริง ให้เข้าถึงได้เลย
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+    
+    # ป้องกัน loop - ถ้าเป็น index.php อยู่แล้วไม่ต้อง redirect
+    RewriteCond %{REQUEST_URI} ^/SalaryApp/src/API/index\.php
+    RewriteRule ^ - [L]
+    
+    # redirect ที่เหลือไปที่ index.php
+    RewriteRule ^(.*)$ index.php [L,QSA]
+</IfModule>
