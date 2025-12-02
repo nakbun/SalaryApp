@@ -7,32 +7,32 @@ function convertMonthToNumber($month) {
 }
 
 function handleUpload() {
-    // Clean any previous output
+    // Clean previous output
     if (ob_get_level()) {
         ob_clean();
     }
-    
+
     try {
         error_log("=== Upload Handler Started ===");
-        
-        // Validate inputs
+
+        // --- Validate request ---
         if (!isset($_FILES['file'])) {
             throw new Exception('ไม่พบไฟล์ที่อัปโหลด');
         }
-        
+
         if (!isset($_POST['month']) || !isset($_POST['year'])) {
             throw new Exception('กรุณาเลือกเดือนและปี');
         }
-        
+
         $file = $_FILES['file'];
-        $selectedMonth = $_POST['month'];
-        $selectedYear = $_POST['year'];
-        
+        $selectedMonth = trim($_POST['month']);
+        $selectedYear  = trim($_POST['year']);
+
         error_log("File: " . $file['name']);
         error_log("Month: " . $selectedMonth);
         error_log("Year: " . $selectedYear);
-        
-        // Check file upload error
+
+        // --- Validate file upload ---
         if ($file['error'] !== UPLOAD_ERR_OK) {
             $errorMessages = [
                 UPLOAD_ERR_INI_SIZE => 'ไฟล์มีขนาดใหญ่เกินกว่าที่กำหนดในเซิร์ฟเวอร์',
@@ -45,91 +45,89 @@ function handleUpload() {
             ];
             throw new Exception($errorMessages[$file['error']] ?? 'เกิดข้อผิดพลาดในการอัปโหลดไฟล์');
         }
-        
-        // Validate file size (max 10MB)
-        if ($file['size'] > 10 * 1024 * 1024) {
+
+        if ($file['size'] > 10 * 1024 * 1024) { // 10 MB
             throw new Exception('ไฟล์มีขนาดใหญ่เกินไป (สูงสุด 10MB)');
         }
-        
-        // Validate month
+
+        // --- Convert Month ---
         $monthNumber = convertMonthToNumber($selectedMonth);
         if ($monthNumber === null) {
-            throw new Exception('รูปแบบเดือนไม่ถูกต้อง: ' . $selectedMonth);
+            throw new Exception("รูปแบบเดือนไม่ถูกต้อง: " . $selectedMonth);
         }
-        
-        // Check if autoload exists
+
+        // --- Check PhpSpreadsheet ---
         $autoloadPath = __DIR__ . '/../../vendor/autoload.php';
         error_log("Checking autoload at: " . realpath($autoloadPath));
-        
+
         if (!file_exists($autoloadPath)) {
-            throw new Exception('ไม่พบ PhpSpreadsheet library - กรุณารันคำสั่ง: composer require phpoffice/phpspreadsheet');
+            throw new Exception("ไม่พบ PhpSpreadsheet library — กรุณาติดตั้งด้วยคำสั่ง: composer require phpoffice/phpspreadsheet");
         }
-        
+
         require_once $autoloadPath;
-        
-        // Check if class exists
+
         if (!class_exists('\PhpOffice\PhpSpreadsheet\Spreadsheet')) {
-            throw new Exception('ไม่พบ PhpSpreadsheet class');
+            throw new Exception("ไม่พบคลาส Spreadsheet ของ PhpSpreadsheet");
         }
-        
-        // Check and create upload folder
-        error_log("Upload folder: " . UPLOAD_FOLDER);
-        
+
+        // --- Upload folder ---
         if (!file_exists(UPLOAD_FOLDER)) {
-            if (!mkdir(UPLOAD_FOLDER, 0755, true)) {
-                throw new Exception('ไม่สามารถสร้างโฟลเดอร์สำหรับอัปโหลดได้');
-            }
+            mkdir(UPLOAD_FOLDER, 0755, true);
         }
-        
+
         if (!is_writable(UPLOAD_FOLDER)) {
-            throw new Exception('ไม่สามารถเขียนไฟล์ลงโฟลเดอร์ upload ได้');
+            throw new Exception("ไม่สามารถเขียนไฟล์ลงโฟลเดอร์ upload ได้");
         }
-        
-        // Move uploaded file
+
+        // --- Save temp uploaded file ---
         $uploadPath = UPLOAD_FOLDER . '/' . uniqid('salary_', true) . '_' . basename($file['name']);
         if (!move_uploaded_file($file['tmp_name'], $uploadPath)) {
-            throw new Exception('ไม่สามารถย้ายไฟล์ที่อัปโหลดได้');
+            throw new Exception("ไม่สามารถย้ายไฟล์ที่อัปโหลดได้");
         }
-        
-        error_log("File uploaded to: " . $uploadPath);
-        
-        // Load spreadsheet
+
+        error_log("Uploaded to: " . $uploadPath);
+
+        // --- Load Excel ---
         try {
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($uploadPath);
         } catch (Exception $e) {
             @unlink($uploadPath);
-            throw new Exception('ไม่สามารถอ่านไฟล์ Excel ได้: ' . $e->getMessage());
+            throw new Exception("อ่านไฟล์ Excel ไม่สำเร็จ: " . $e->getMessage());
         }
-        
+
+        // ======================================================================
+        // === HIGH LEVEL PROCESSING (เหมือนเวอร์ชันก่อนหน้า — ไม่ตัดอะไรออก) ===
+        // ======================================================================
+
         $allData = [];
         $processedSheets = [];
         $skippedSheets = [];
-        
+
         foreach ($spreadsheet->getWorksheetIterator() as $worksheet) {
             $sheetName = $worksheet->getTitle();
             $rows = $worksheet->toArray();
-            
-            error_log("Processing sheet: " . $sheetName . " (" . count($rows) . " rows)");
-            
+
+            error_log("Processing sheet: {$sheetName} (" . count($rows) . " rows)");
+
             if (empty($rows) || count($rows) < 2) {
                 $skippedSheets[] = $sheetName;
                 continue;
             }
-            
-            // Process header
+
+            // Header
             $header = [];
             foreach ($rows[0] as $col) {
                 $colName = trim($col ?? '');
-                if (empty($colName) || strtolower($colName) === 'nan') {
+                if ($colName === '' || strtolower($colName) === 'nan') {
                     $colName = 'col_empty_' . count($header);
                 }
                 $header[] = $colName;
             }
-            
-            // Process data rows
+
+            // Filter rows (remove empty + footer)
             $dataRows = array_slice($rows, 1);
             $filteredRows = [];
-            
+
             foreach ($dataRows as $row) {
                 $hasData = false;
                 foreach ($row as $cell) {
@@ -138,40 +136,37 @@ function handleUpload() {
                         break;
                     }
                 }
-                
-                // Skip footer rows
-                $rowStr = implode('', $row);
-                if (strpos($rowStr, 'รายละเอียดเพิ่มเติม') !== false) {
+
+                if (strpos(implode('', $row), 'รายละเอียดเพิ่มเติม') !== false) {
                     break;
                 }
-                
+
                 if ($hasData) {
                     $filteredRows[] = $row;
                 }
             }
-            
+
             if (empty($filteredRows)) {
                 $skippedSheets[] = $sheetName;
                 continue;
             }
-            
+
             // Map columns
             $mappedHeader = [];
             foreach ($header as $col) {
-                $mappedCol = $GLOBALS['COLUMN_MAP'][$col] ?? cleanColumnName($col);
-                $mappedHeader[] = $mappedCol;
+                $mappedHeader[] = $GLOBALS['COLUMN_MAP'][$col] ?? cleanColumnName($col);
             }
-            
-            // Process each row
+
+            // Build rows
             foreach ($filteredRows as $rowIndex => $rowData) {
                 $processedRow = [];
                 $processedRow['employee'] = $sheetName;
                 $processedRow['month'] = $monthNumber;
-                $processedRow['year'] = (int)$selectedYear;
-                
+                $processedRow['year']  = (int)$selectedYear;
+
                 foreach ($mappedHeader as $idx => $colName) {
                     $value = $rowData[$idx] ?? null;
-                    
+
                     if ($colName === 'cid') {
                         $processedRow[$colName] = cleanCid($value);
                     } elseif ($colName === 'year') {
@@ -186,32 +181,29 @@ function handleUpload() {
                         $processedRow[$colName] = cleanValue($value);
                     }
                 }
-                
-                // Add default CID if missing
+
                 if (empty($processedRow['cid'])) {
                     $processedRow['cid'] = $sheetName . '_' . $rowIndex;
                 }
-                
+
                 $allData[] = $processedRow;
             }
-            
+
             $processedSheets[] = $sheetName;
         }
-        
+
         if (empty($allData)) {
             @unlink($uploadPath);
-            throw new Exception('ไม่พบข้อมูลที่สามารถประมวลผลได้');
+            throw new Exception("ไม่พบข้อมูลที่สามารถประมวลผลได้");
         }
-        
-        error_log("Total rows to save: " . count($allData));
-        
-        // Save to database
+
+        // Save to MySQL
         $saved = saveToMySQL($allData);
-        
-        // Clean up
+
+        // Cleanup
         @unlink($uploadPath);
-        
-        // Return success response
+
+        // --- JSON Response ---
         echo json_encode([
             'status' => 'success',
             'processed_sheets' => $processedSheets,
@@ -221,11 +213,11 @@ function handleUpload() {
             'selected_month' => $monthNumber,
             'selected_year' => $selectedYear
         ], JSON_UNESCAPED_UNICODE);
-        
+
     } catch (Exception $e) {
+
         error_log("Upload error: " . $e->getMessage());
-        error_log("Stack trace: " . $e->getTraceAsString());
-        
+
         http_response_code(400);
         echo json_encode([
             'status' => 'error',

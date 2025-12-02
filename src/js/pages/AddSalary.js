@@ -221,7 +221,7 @@ async function handleUpload() {
         console.log('Year:', selectedYear);
         
         // เปลี่ยน URL ตรงนี้ - ไม่ต้องมี /upload
-        const data = await API.upload('/SalaryApp/src/API/index.php', formData);
+        const data = await API.upload(API.baseURL, formData);
         
         if (data.status === 'success') {
             showAddSalaryModal(true, {

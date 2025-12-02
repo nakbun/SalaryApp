@@ -3,7 +3,7 @@
     "description": "Salary App API - PHP Backend",
     "require": {
         "php": ">=7.4",
-        "phpoffice/phpspreadsheet": "^1.29"
+        "phpoffice/phpspreadsheet": "^2.1"
     },
     "autoload": {
         "psr-4": {
@@ -11,5 +11,3 @@
         }
     }
 }
-
-

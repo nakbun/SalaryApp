@@ -10,7 +10,7 @@
 PhpSpreadsheet is a library written in pure PHP and offers a set of classes that
 allow you to read and write various spreadsheet file formats such as Excel and LibreOffice Calc.
 
-This branch (release1291) is *not* the latest version of PhpSpreadsheet, and may therefore lack features and bug fixes found in the latest version.
+This branch (release210) is *not* the latest version of PhpSpreadsheet, and may therefore lack features and bug fixes found in the latest version.
 
 ## Security Changes Only
 
@@ -25,7 +25,7 @@ Of particular note is that this branch should not run under Php 8.5, and will *n
 LTS: For maintained branches, support for PHP versions will only be maintained for a period of six months beyond the
 [end of life](https://www.php.net/supported-versions) of that PHP version.
 
-Currently the required PHP minimum version is PHP __7.4__, and we [will support that version](https://www.php.net/eol.php) until 28th June 2023.
+Currently the required PHP minimum version is PHP __8.0__, and we [will nominally support that version](https://www.php.net/eol.php) until May 2024.
 However, since this branch is no longer maintained, that policy is not enforced.
 The PHP maximum version supported by this release is PHP __8.4__.
 
@@ -42,12 +42,9 @@ composer require phpoffice/phpspreadsheet
 If you are building your installation on a development machine that is on a different PHP version to the server where it will be deployed, or if your PHP CLI version is not the same as your run-time such as `php-fpm` or Apache's `mod_php`, then you might want to add the following to your `composer.json` before installing:
 ```json
 {
-    "require": {
-        "phpoffice/phpspreadsheet": "^1.28"
-    },
     "config": {
         "platform": {
-            "php": "7.4"
+            "php": "8.0"
         }
     }
 }
