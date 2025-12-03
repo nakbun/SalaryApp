@@ -425,10 +425,10 @@ body {
 /* Form Grid - จัดให้กระจายเท่าๆ กัน */
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;  /* แบ่งเป็น 2 คอลัมน์เท่ากัน */
-  gap: 30px;  /* เว้นระยะระหว่างกล่อง */
-  padding: 0 80px;  /* เว้นระยะจากขอบซ้าย-ขวา */
-}   
+  grid-template-columns: repeat(2, 1fr); /* 2 คอลัมน์เท่ากัน */
+  gap: 20px; /* ลดช่องว่างระหว่างกล่อง */
+  padding: 0; /* เอา padding ด้านข้างออก เพื่อให้เต็มพื้นที่ container */
+} 
 
 /* Form Group */
 .form-group {

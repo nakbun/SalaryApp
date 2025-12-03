@@ -1,9 +1,9 @@
 <?php
 // Database Configuration
-define('DB_HOST', 'localhost');  // แก้จาก 'locslhost'
-define('DB_USER', 'root');
-define('DB_PASS', '#Bb108935');
-define('DB_NAME', 'salary_db');
+define('DB_HOST', '10.0.0.11');  // แก้จาก 'locslhost'
+define('DB_USER', 'admintoy');
+define('DB_PASS', 'Gotoyt@y1@y2522');
+define('DB_NAME', 'hrd_salary');
 
 // Upload Configuration
 define('UPLOAD_FOLDER', __DIR__ . '/uploads');
