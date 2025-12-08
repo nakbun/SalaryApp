@@ -4,91 +4,43 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit87bdc209b443788c247fd84d374b2f26
+class ComposerStaticInit307d05c98d4ab29e62fa7596761f61ac
 {
     public static $prefixLengthsPsr4 = array (
-        'Z' =>
-        array (
-            'ZipStream\\' => 10,
-        ),
-        'S' =>
+        'S' => 
         array (
             'SalaryApp\\' => 10,
-        ),
-        'P' =>
-        array (
-            'Psr\\SimpleCache\\' => 16,
-            'Psr\\Http\\Message\\' => 17,
-            'Psr\\Http\\Client\\' => 16,
-            'PhpOffice\\PhpSpreadsheet\\' => 25,
-        ),
-        'M' =>
-        array (
-            'MyCLabs\\Enum\\' => 13,
-            'Matrix\\' => 7,
-        ),
-        'C' =>
-        array (
-            'Composer\\Pcre\\' => 14,
-            'Complex\\' => 8,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'ZipStream\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/maennchen/zipstream-php/src',
-        ),
-        'SalaryApp\\' =>
+        'SalaryApp\\' => 
         array (
             0 => __DIR__ . '/../..' . '/src',
         ),
-        'Psr\\SimpleCache\\' =>
+    );
+
+    public static $prefixesPsr0 = array (
+        'P' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/simple-cache/src',
-        ),
-        'Psr\\Http\\Message\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-factory/src',
-            1 => __DIR__ . '/..' . '/psr/http-message/src',
-        ),
-        'Psr\\Http\\Client\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-client/src',
-        ),
-        'PhpOffice\\PhpSpreadsheet\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/phpoffice/phpspreadsheet/src/PhpSpreadsheet',
-        ),
-        'MyCLabs\\Enum\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/myclabs/php-enum/src',
-        ),
-        'Matrix\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/markbaker/matrix/classes/src',
-        ),
-        'Composer\\Pcre\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/composer/pcre/src',
-        ),
-        'Complex\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/markbaker/complex/classes/src',
+            'PHPExcel' => 
+            array (
+                0 => __DIR__ . '/..' . '/phpoffice/phpexcel/Classes',
+            ),
         ),
     );
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'Stringable' => __DIR__ . '/..' . '/myclabs/php-enum/stubs/Stringable.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit87bdc209b443788c247fd84d374b2f26::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit87bdc209b443788c247fd84d374b2f26::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit87bdc209b443788c247fd84d374b2f26::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit307d05c98d4ab29e62fa7596761f61ac::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit307d05c98d4ab29e62fa7596761f61ac::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit307d05c98d4ab29e62fa7596761f61ac::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit307d05c98d4ab29e62fa7596761f61ac::$classMap;
 
         }, null, ClassLoader::class);
     }
