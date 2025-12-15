@@ -49,18 +49,35 @@ body {
 }
 
 .header-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+    display: flex;
+    align-items: center;   /* จัดให้อยู่ระดับเดียวกัน */
+    gap: 10px;             /* เว้นระยะระหว่างรูปกับข้อความ */
 }
+
+.header-text {
+    display: flex;
+    flex-direction: column;  /* เรียง h1 → p ลงล่าง */
+    line-height: 1.2;
+}
+
+.hospital-name {
+    margin: 0;       /* ตัด margin ที่ทำให้มันห่างเกินไป */
+}
+
+.name-app {
+    margin: 0;
+    font-size: 18px !important;
+    opacity: 0.9;
+}
+
 
 .logo-placeholder {
   font-size: 60px;
 }
 
 .logo {
-  width: 120px;
-  height: 120px;
+  width: 200px !important;
+  height: 180px !important;
   border-radius: 2px;
   object-fit: contain;
 }
@@ -365,9 +382,9 @@ body {
 
 .tab-btn {
   padding: 12px 30px;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border: 1px solid rgb(188, 188, 188) !important;
+  border-radius: 8px ;
+  font-size: 18px !important;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -413,13 +430,75 @@ body {
 }
 
 .section-title {
-  font-size: 20px;
-  font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.section-title .icon,
+.section-title .title {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #333; /* ป้องกันตัวอักษรโปร่งหรือสีจาง */
+    opacity: 1 !important; /* กัน style อื่นทำให้จาง */
+}
+
+.section-title .title {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.section-title button {
+    margin-left: auto;
+}
+
+/* ⭐ ปุ่มรายงานผล ปรับให้สวยเรียบร้อย */
+.report-btn {
+    padding: 12px 32px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+
+    /* 🌈 พื้นหลังสีรุ้งพร้อม animation */
+    background-size: 300% 300%;
+    background-image: linear-gradient(
+        45deg,
+        #ff0000,
+        #ff7a00,
+        #ffee00,
+        #33ff00,
+        #00ffee,
+        #0066ff,
+        #aa00ff,
+        #ff00aa,
+        #ff0000
+    );
+    animation: rainbowMove 5s ease infinite;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s;
+}
+
+/* Animation move */
+@keyframes rainbowMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Hover effect */
+.report-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Active effect */
+.report-btn:active {
+    transform: translateY(1px);
 }
 
 /* Form Grid - จัดให้กระจายเท่าๆ กัน */

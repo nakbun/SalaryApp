@@ -65,7 +65,6 @@ const API = {
     // ---------------------------
     async handleResponse(response) {
         const text = await response.text();
-        console.log("API Response:", text);
 
         let json = null;
         try {

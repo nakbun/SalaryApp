@@ -85,9 +85,14 @@ require_once __DIR__ . '/config.php';
 // HELPERS
 // -------------------------------
 function json_ok($data = []) {
-    if (ob_get_length()) ob_clean();
-    // array_merge ใช้ได้ปกติ
+    // 1. ล้างข้อมูลทุกอย่างที่เคย echo ออกมาก่อนหน้านี้
+    if (ob_get_length()) ob_clean(); 
+    
+    // 2. ส่งข้อมูล success พร้อมข้อมูล
     echo json_encode(array_merge(['status' => 'success'], $data), JSON_UNESCAPED_UNICODE);
+    
+    // 3. ปิด Buffer และส่งข้อมูลออกไปทันที
+    ob_end_flush(); 
     exit;
 }
 
@@ -95,6 +100,8 @@ function json_err($message, $code = 500, $extra = []) {
     if (ob_get_length()) ob_clean();
     http_response_code($code);
     echo json_encode(array_merge(['status' => 'error', 'error' => $message], $extra), JSON_UNESCAPED_UNICODE);
+    
+    ob_end_flush();
     exit;
 }
 
@@ -344,7 +351,7 @@ if ($action === 'salary-data' || $action === 'get_data') {
             $bind[':emp'] = $params['employee'];
         }
 
-        $sql .= " ORDER BY employee, id LIMIT 1000";
+        $sql .= " ORDER BY employee, id";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($bind);

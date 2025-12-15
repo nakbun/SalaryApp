@@ -1,6 +1,6 @@
 <?php
 // ==========================
-// api.php - API Endpoints
+// slip.php - Salary Slip API
 // ==========================
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -26,6 +26,14 @@ function getDBConnection() {
     }
 }
 
+// Thai month names
+$MONTH_NAMES = array(
+    1 => 'มกราคม', 2 => 'กุมภาพันธ์', 3 => 'มีนาคม',
+    4 => 'เมษายน', 5 => 'พฤษภาคม', 6 => 'มิถุนายน',
+    7 => 'กรกฎาคม', 8 => 'สิงหาคม', 9 => 'กันยายน',
+    10 => 'ตุลาคม', 11 => 'พฤศจิกายน', 12 => 'ธันวาคม'
+);
+
 // Get action
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
@@ -36,15 +44,6 @@ switch($action) {
         break;
     case 'get_employee':
         getEmployee();
-        break;
-    case 'search':
-        searchEmployees();
-        break;
-    case 'get_months':
-        getAvailableMonths();
-        break;
-    case 'upload_excel':
-        uploadExcel();
         break;
     default:
         echo json_encode(array('error' => 'Invalid action'));
@@ -74,7 +73,7 @@ function getEmployees() {
             'count' => count($employees)
         ));
     } catch(PDOException $e) {
-        echo json_encode(array('error' => $e->getMessage()));
+        echo json_encode(array('success' => false, 'error' => $e->getMessage()));
     }
 }
 
@@ -105,67 +104,6 @@ function getEmployee() {
         } else {
             echo json_encode(array('error' => 'ไม่พบข้อมูลพนักงาน'));
         }
-    } catch(PDOException $e) {
-        echo json_encode(array('error' => $e->getMessage()));
-    }
-}
-
-// ==========================
-// Search employees
-// ==========================
-function searchEmployees() {
-    $conn = getDBConnection();
-    $keyword = isset($_GET['keyword']) ? trim($_GET['keyword']) : '';
-    $month = isset($_GET['month']) ? intval($_GET['month']) : date('n');
-    $year = isset($_GET['year']) ? intval($_GET['year']) : (intval(date('Y')) + 543);
-    
-    try {
-        $sql = "SELECT * FROM salary_data 
-                WHERE (name LIKE :keyword OR cid LIKE :keyword OR bank_account LIKE :keyword) 
-                AND month = :month AND year = :year 
-                ORDER BY name ASC";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute(array(
-            ':keyword' => '%' . $keyword . '%',
-            ':month' => $month,
-            ':year' => $year
-        ));
-        
-        $employees = array();
-        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $employees[] = processEmployeeData($row);
-        }
-        
-        echo json_encode(array(
-            'success' => true,
-            'data' => $employees,
-            'count' => count($employees)
-        ));
-    } catch(PDOException $e) {
-        echo json_encode(array('error' => $e->getMessage()));
-    }
-}
-
-// ==========================
-// Get available months
-// ==========================
-function getAvailableMonths() {
-    $conn = getDBConnection();
-    
-    try {
-        $sql = "SELECT DISTINCT month, year FROM salary_data ORDER BY year DESC, month DESC";
-        $stmt = $conn->query($sql);
-        
-        $months = array();
-        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $months[] = array(
-                'month' => intval($row['month']),
-                'year' => intval($row['year']),
-                'label' => $GLOBALS['MONTH_NAMES'][$row['month']] . ' ' . $row['year']
-            );
-        }
-        
-        echo json_encode(array('success' => true, 'data' => $months));
     } catch(PDOException $e) {
         echo json_encode(array('error' => $e->getMessage()));
     }
@@ -257,169 +195,5 @@ function processEmployeeData($row) {
         'total_expense' => $total_expense,
         'net_balance' => $net_balance
     );
-}
-
-// ==========================
-// Upload Excel file
-// ==========================
-function uploadExcel() {
-    if($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        echo json_encode(array('error' => 'Method not allowed'));
-        return;
-    }
-    
-    if(!isset($_FILES['file'])) {
-        echo json_encode(array('error' => 'ไม่พบไฟล์ที่อัพโหลด'));
-        return;
-    }
-    
-    require_once 'PHPExcel/PHPExcel.php';
-    
-    $file = $_FILES['file']['tmp_name'];
-    $month = isset($_POST['month']) ? intval($_POST['month']) : date('n');
-    $year = isset($_POST['year']) ? intval($_POST['year']) : (intval(date('Y')) + 543);
-    
-    try {
-        $objPHPExcel = PHPExcel_IOFactory::load($file);
-        $sheet = $objPHPExcel->getActiveSheet();
-        $highestRow = $sheet->getHighestRow();
-        
-        // Get headers from first row
-        $headers = array();
-        $highestColumn = $sheet->getHighestColumn();
-        $highestColumnIndex = PHPExcel_Cell::columnIndexFromString($highestColumn);
-        
-        for($col = 0; $col < $highestColumnIndex; $col++) {
-            $cellValue = $sheet->getCellByColumnAndRow($col, 1)->getValue();
-            $headers[$col] = trim($cellValue);
-        }
-        
-        $conn = getDBConnection();
-        $inserted = 0;
-        $updated = 0;
-        $errors = array();
-        
-        for($row = 2; $row <= $highestRow; $row++) {
-            $data = array();
-            
-            for($col = 0; $col < $highestColumnIndex; $col++) {
-                $header = $headers[$col];
-                if(isset($GLOBALS['COLUMN_MAP'][$header])) {
-                    $dbColumn = $GLOBALS['COLUMN_MAP'][$header];
-                    $cellValue = $sheet->getCellByColumnAndRow($col, $row)->getValue();
-                    
-                    // Clean numeric values
-                    if(in_array($dbColumn, $GLOBALS['NUMERIC_COLUMNS'])) {
-                        $cellValue = cleanNumericValue($cellValue);
-                    }
-                    
-                    $data[$dbColumn] = $cellValue;
-                }
-            }
-            
-            // ต้องมีข้อมูลพื้นฐาน
-            if(!empty($data['cid']) && !empty($data['name'])) {
-                $data['month'] = $month;
-                $data['year'] = $year;
-                
-                // Check if exists
-                $checkSql = "SELECT id FROM salary_data WHERE cid = :cid AND month = :month AND year = :year";
-                $checkStmt = $conn->prepare($checkSql);
-                $checkStmt->execute(array(
-                    ':cid' => $data['cid'],
-                    ':month' => $month,
-                    ':year' => $year
-                ));
-                
-                if($checkStmt->fetch()) {
-                    // Update
-                    updateEmployee($conn, $data);
-                    $updated++;
-                } else {
-                    // Insert
-                    insertEmployee($conn, $data);
-                    $inserted++;
-                }
-            } else {
-                $errors[] = "แถว $row: ข้อมูลไม่ครบถ้วน";
-            }
-        }
-        
-        echo json_encode(array(
-            'success' => true,
-            'inserted' => $inserted,
-            'updated' => $updated,
-            'errors' => $errors
-        ));
-        
-    } catch(Exception $e) {
-        echo json_encode(array('error' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()));
-    }
-}
-
-// ==========================
-// Insert employee
-// ==========================
-function insertEmployee($conn, $data) {
-    $columns = array_keys($data);
-    $placeholders = array_map(function($col) { return ':' . $col; }, $columns);
-    
-    $sql = "INSERT INTO salary_data (" . implode(', ', $columns) . ") 
-            VALUES (" . implode(', ', $placeholders) . ")";
-    $stmt = $conn->prepare($sql);
-    
-    foreach($data as $key => $value) {
-        $stmt->bindValue(':' . $key, $value);
-    }
-    
-    $stmt->execute();
-}
-
-// ==========================
-// Update employee
-// ==========================
-function updateEmployee($conn, $data) {
-    $cid = $data['cid'];
-    $month = $data['month'];
-    $year = $data['year'];
-    
-    unset($data['cid']);
-    unset($data['month']);
-    unset($data['year']);
-    
-    $setParts = array();
-    foreach($data as $key => $value) {
-        $setParts[] = "$key = :$key";
-    }
-    
-    $sql = "UPDATE salary_data SET " . implode(', ', $setParts) . " 
-            WHERE cid = :cid AND month = :month AND year = :year";
-    
-    $stmt = $conn->prepare($sql);
-    
-    foreach($data as $key => $value) {
-        $stmt->bindValue(':' . $key, $value);
-    }
-    
-    $stmt->bindValue(':cid', $cid);
-    $stmt->bindValue(':month', $month);
-    $stmt->bindValue(':year', $year);
-    
-    $stmt->execute();
-}
-
-// ==========================
-// Clean numeric value
-// ==========================
-function cleanNumericValue($value) {
-    if(is_null($value) || $value === '') {
-        return 0;
-    }
-    
-    // Remove commas and convert to float
-    $value = str_replace(',', '', $value);
-    $value = floatval($value);
-    
-    return $value;
 }
 ?>

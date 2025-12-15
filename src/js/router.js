@@ -1,4 +1,4 @@
-// Simple Router for Vanilla JS
+// Simple Router for Vanilla JS with Async Support
 class Router {
     constructor() {
         this.routes = {};
@@ -26,7 +26,7 @@ class Router {
         this.handleRoute();
     }
     
-    handleRoute() {
+    async handleRoute() {
         const path = window.location.pathname.replace(this.basePath, '') || '/';
         const route = this.routes[path] || this.routes['*'];
         
@@ -41,7 +41,13 @@ class Router {
         }
         
         this.currentRoute = path;
-        route.handler();
+        
+        // Support async handlers
+        try {
+            await route.handler();
+        } catch (error) {
+            console.error('Route handler error:', error);
+        }
     }
     
     getCurrentPath() {
@@ -51,5 +57,3 @@ class Router {
 
 const router = new Router();
 window.router = router;
-
-

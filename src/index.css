@@ -147,3 +147,4 @@ input:read-only {
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* ทำให้ยืดหยุ่นตามขนาดจอ */
   gap: 1rem;
 }
+

@@ -22,7 +22,10 @@ window.renderSalarySystem = function () {
             <div class="header">
                 <div class="header-left">
                     <img src="/SalaryApp/public/img/image-Photoroom (1).png" alt="Logo" class="logo" />
-                    <h1 class="hospital-name">โรงพยาบาลจิตเวชเลยราชนครินทร์</h1>
+                    <div class="header-text">
+                        <h1 class="hospital-name">โรงพยาบาลจิตเวชเลยราชนครินทร์</h1>
+                        <p class="name-app">ระบบสลิปเงินเดือนบุคลากร</p>
+                    </div>
                 </div>
                 <div class="header-right">
                     <button class="btn btn-green" id="add-new-btn">✚ เพิ่มข้อมูล</button>
@@ -45,7 +48,11 @@ window.renderSalarySystem = function () {
             </div>
 
             <div class="search-section full-width">
-                <h2 class="section-title"><span>🔍</span><span>ค้นหาข้อมูลเงินเดือน</span></h2>
+                <h2 class="section-title">
+                    <span class="icon">🔍</span>
+                    <span class="title">ค้นหาข้อมูลเงินเดือน</span>
+                    <button class="report-btn" id="dashboard-btn">รายงานผล</button>
+                </h2>
                 <div class="search-inputs-container">
                     <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
                         <div class="form-group" style="flex: 1; min-width: 200px;">
@@ -104,6 +111,7 @@ function setupEventListeners() {
 
     safeOn('add-new-btn', 'click', () => router.navigate('/addsalary'));
     safeOn('logout-btn', 'click', () => Auth.logout());
+    safeOn('dashboard-btn', 'click', () => router.navigate('/dashboard'));
 
     const pBtn = document.getElementById('profile-button');
     const pDrop = document.getElementById('profile-dropdown');
@@ -208,17 +216,17 @@ function renderContent() {
     const noResults = document.getElementById('no-results');
     const header = document.getElementById('results-header');
     const printBtn = document.getElementById('print-all-btn');
-    
-    if(!container) return;
+
+    if (!container) return;
 
     // 🔴 1. อัปเดตจำนวนรายการทันที (ไว้บนสุดเลย เพื่อให้เลขเปลี่ยนเสมอ)
-    if(header) header.innerHTML = `📋 ผลการค้นหา (พบ ${results.length} รายการ)`;
+    if (header) header.innerHTML = `📋 ผลการค้นหา (พบ ${results.length} รายการ)`;
 
     // 2. กรณีไม่มีข้อมูล (0 รายการ)
     if (results.length === 0) {
-        if(noResults) noResults.style.display = 'block';
-        if(printBtn) printBtn.style.display = 'none';
-        
+        if (noResults) noResults.style.display = 'block';
+        if (printBtn) printBtn.style.display = 'none';
+
         // แสดงข้อความ 0 ถึง 0 ให้ชัดเจน
         container.innerHTML = `
             <div style="text-align: center; margin-top: 20px; color: #666; font-size: 0.9em;">
@@ -229,12 +237,12 @@ function renderContent() {
     }
 
     // 3. กรณีมีข้อมูล
-    if(noResults) noResults.style.display = 'none';
-    if(printBtn) printBtn.style.display = 'block';
+    if (noResults) noResults.style.display = 'none';
+    if (printBtn) printBtn.style.display = 'block';
 
     const totalPages = Math.ceil(results.length / itemsPerPage);
     if (currentPage > totalPages) currentPage = 1;
-    
+
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const currentData = results.slice(start, end);
@@ -260,11 +268,11 @@ function renderContent() {
         html += `
             <tr>
                 <td>${start + i + 1}</td>
-                <td>${row.name||'-'}</td>
-                <td><span class="badge ${badgeClass}">${row.employee||'ไม่ระบุ'}</span></td>
-                <td>${row.cid||'-'}</td>
-                <td>${row.bank_account||'-'}</td>
-                <td>${Utils.getThaiMonthName(row.month)} ${row.year||''}</td>
+                <td>${row.name || '-'}</td>
+                <td><span class="badge ${badgeClass}">${row.employee || 'ไม่ระบุ'}</span></td>
+                <td>${row.cid || '-'}</td>
+                <td>${row.bank_account || '-'}</td>
+                <td>${Utils.getThaiMonthName(row.month)} ${row.year || ''}</td>
                 <td class="text-green">${Utils.formatCurrency(row.total_income)}</td>
                 <td class="text-red">${Utils.formatCurrency(row.total_expense)}</td>
                 <td class="text-blue text-bold">${Utils.formatCurrency(row.net_balance)}</td>
@@ -288,8 +296,8 @@ function renderContent() {
     html += `
         <div class="pagination-wrapper" style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 20px; padding-bottom: 40px;">
             <div style="display: flex; justify-content: center; gap: 6px; align-items: center; flex-wrap: wrap;">
-                <button class="pagination-btn text-btn" ${currentPage===1?'disabled':''} onclick="goToPage(1)">หน้าแรก</button>
-                <button class="pagination-btn text-btn" ${currentPage===1?'disabled':''} onclick="goToPage(${currentPage-1})">ก่อนหน้า</button>
+                <button class="pagination-btn text-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(1)">หน้าแรก</button>
+                <button class="pagination-btn text-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">ก่อนหน้า</button>
     `;
 
     range.forEach(p => {
@@ -302,12 +310,12 @@ function renderContent() {
     });
 
     html += `
-                <button class="pagination-btn text-btn" ${currentPage===totalPages?'disabled':''} onclick="goToPage(${currentPage+1})">ถัดไป</button>
-                <button class="pagination-btn text-btn" ${currentPage===totalPages?'disabled':''} onclick="goToPage(${totalPages})">หน้าสุดท้าย</button>
+                <button class="pagination-btn text-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">ถัดไป</button>
+                <button class="pagination-btn text-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${totalPages})">หน้าสุดท้าย</button>
             </div>
 
             <div style="font-size: 0.9em; color: #666; text-align: center;">
-                แสดงรายการที่ ${start+1} ถึง ${Math.min(end, results.length)} จากทั้งหมด ${results.length} รายการ
+                แสดงรายการที่ ${start + 1} ถึง ${Math.min(end, results.length)} จากทั้งหมด ${results.length} รายการ
             </div>
         </div>
     `;

@@ -1,35 +1,50 @@
+/* SalarySlip.css - Unified Version with Fixed Modal */
+
+/* Import Font */
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap');
+
+/* ============================================
+   GLOBAL RESET & BASE STYLES
+============================================ */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+html, body, #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: auto;
+}
+
 body {
     font-family: 'Sarabun', 'TH Sarabun New', sans-serif;
     background: #f5f5f5;
+    min-height: 100vh;
+    overflow-y: auto;
 }
 
-/* Print Container */
+/* ============================================
+   SALARY SLIP PRINT STYLES
+============================================ */
 .print-container {
-    max-width: 100%;
-    width: 1000px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
-    background: #f5f5f5;
 }
 
-/* Action Buttons */
+/* Print Actions Buttons */
 .print-actions {
     display: flex;
-    gap: 10px;
+    gap: 15px;
     justify-content: center;
     align-items: center;
-    margin-bottom: 20px;
-    padding: 20px;
+    margin-bottom: 30px;
 }
 
-.btn-print,
-.btn-back {
+.btn-print, .btn-back {
     padding: 12px 24px;
     border: none;
     border-radius: 8px;
@@ -37,8 +52,6 @@ body {
     font-size: 16px;
     font-weight: 600;
     transition: all 0.3s;
-    display: flex;
-    align-items: center;
 }
 
 .btn-print {
@@ -48,7 +61,6 @@ body {
 
 .btn-print:hover {
     background: #059669;
-    transform: translateY(-2px);
 }
 
 .btn-back {
@@ -57,22 +69,26 @@ body {
 }
 
 .btn-back:hover {
-    background: #589eff;
-    transform: translateY(-2px);
+    background: #4338ca;
 }
 
 .page-info {
-    padding: 8px 16px;
+    padding: 10px 20px;
     background: #6b7280;
     color: white;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 14px;
-    font-weight: 500;
-    margin-left: 150px;
-    margin-right: 150px;
 }
 
-/* แสดง/ซ่อนตามโหมด */
+/* Grid - 2 columns for slips */
+.slips-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin: 20px auto;
+    max-width: 1200px;
+}
+
 .screen-only {
     display: block;
 }
@@ -81,17 +97,237 @@ body {
     display: none;
 }
 
-/* Pagination Controls */
+/* ============================================
+   SLIP CARD STYLES
+============================================ */
+.slip-card {
+    background: white;
+    border: 2px solid #000 !important;
+    padding: 12px;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.slip-card * {
+    box-sizing: border-box;
+}
+
+/* Expand Button */
+.expand-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.expand-btn:hover {
+    background: #2563eb;
+    transform: scale(1.1);
+}
+
+/* Slip Header */
+.slip-header {
+    display: grid;
+    grid-template-columns: 45px 1fr auto;
+    gap: 8px;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+    align-items: start;
+}
+
+.logo-section {
+    grid-column: 1;
+}
+
+.logo-slip {
+    width: 40px;
+    height: auto;
+    display: block;
+}
+
+.header-text {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.header-text h3 {
+    font-size: 13px;
+    margin: 0;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #000;
+}
+
+.header-text p {
+    font-size: 11px;
+    margin: 0;
+    line-height: 1.3;
+    color: #000;
+}
+
+.header-info {
+    grid-column: 3;
+    text-align: right;
+    font-size: 10px;
+    line-height: 1.4;
+    color: #000;
+}
+
+.header-info p {
+    margin: 1px 0;
+    display: flex-start;
+}
+
+/* ============================================
+   SLIP TABLE STYLES
+============================================ */
+.slip-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    table-layout: fixed;
+    color: #000;
+}
+
+.slip-table thead th {
+    border: 1px solid #000;
+    padding: 4px 3px;
+    background: #f5f5f5;
+    font-weight: 700;
+    text-align: center;
+    font-size: 10px;
+    line-height: 1.2;
+}
+
+.slip-table .main-header th {
+    font-size: 10px;
+    padding: 5px;
+}
+
+.slip-table tbody td {
+    border-left: 1px solid #000;
+    border-right: 1px solid #000;
+    border-top: none;
+    border-bottom: none;
+    padding: 2px 4px;
+    height: 18px;
+    font-size: 10px;
+    vertical-align: middle;
+    line-height: 1.1;
+}
+
+.slip-table tbody tr:first-child td {
+    border-top: 1px solid #000;
+}
+
+.slip-table tbody tr:last-child td {
+    border-bottom: 1px solid #000;
+}
+
+.slip-table .seq {
+    width: 6%;
+    text-align: center;
+}
+
+.slip-table .label {
+    width: 20%;
+    text-align: left;
+    padding-left: 4px;
+    font-size: 8px;
+}
+
+.slip-table .amount {
+    width: 10%;
+    text-align: right;
+    padding-right: 4px;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.slip-table .notes-header,
+.slip-table .notes-cell {
+    width: 28%;
+    text-align: center;
+    padding: 1px 6px;
+    font-size: 6px;
+    line-height: 1.1;
+    vertical-align: middle;
+    height: 13px;
+}
+
+/* Note Label และ Inline Table */
+.note-label {
+    font-weight: normal;
+    margin-bottom: 2px;
+    font-size: 6px;
+}
+
+.note-inline-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+    font-size: 8px;
+}
+
+.note-inline-table td {
+    padding: 1px 2px;
+    border: none;
+    text-align: center;
+}
+
+.slip-table .notes-footer {
+    border: 1px solid #000;
+    background: #f5f5f5;
+}
+
+.slip-table tfoot td {
+    border: 1px solid #000;
+    padding: 4px;
+    background: #f5f5f5;
+    font-weight: 700;
+    font-size: 11px;
+    vertical-align: middle;
+}
+
+.slip-table .total-row td {
+    text-align: right;
+    font-size: 10px; /* ใหญ่กว่าปกติ */
+}
+
+.slip-table .net-row td {
+    background: #e5e7eb;
+    text-align: right;
+    font-size: 10px; /* ขนาดใหญ่พิเศษ */
+    padding: 8px 4px; /* เพิ่มความสูงช่อง */
+    border-top: 2px solid #000; /* เพิ่มเส้นหนาด้านบน */
+}
+
+/* ============================================
+   PAGINATION STYLES
+============================================ */
 .pagination-controls {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     margin: 20px 0;
     padding: 20px;
     background: white;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     flex-wrap: wrap;
 }
 
@@ -105,704 +341,500 @@ body {
     font-size: 14px;
     font-weight: 600;
     transition: all 0.3s;
-    min-width: 100px;
 }
 
 .btn-page:hover:not(:disabled) {
     background: #3b82f6;
     color: white;
-    border-color: #3b82f6;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .btn-page:disabled {
     opacity: 0.4;
     cursor: not-allowed;
-    border-color: #e5e7eb;
-    color: #9ca3af;
-    background: #f9fafb;
 }
 
 .page-numbers {
     display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    justify-content: center;
+    gap: 8px;
 }
 
 .btn-page-number {
-    width: 42px;
-    height: 42px;
-    border: 2px solid #e5e7eb;
-    background: white;
+    width: 44px;
+    height: 44px;
+    border: 2px solid #818181;
     color: #374151;
+    background: white;
     border-radius: 8px;
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .btn-page-number:hover {
     border-color: #3b82f6;
     color: #3b82f6;
-    background: #eff6ff;
-    transform: translateY(-2px);
 }
 
 .btn-page-number.active {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background: #3b82f6;
     color: white;
     border-color: #3b82f6;
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 .pagination-info {
     width: 100%;
     text-align: center;
-    margin-top: 12px;
-    padding-top: 12px;
+    margin-top: 15px;
+    padding-top: 15px;
     border-top: 2px solid #f3f4f6;
     color: #6b7280;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 14px;
 }
 
-.pagination-dots {
-    padding: 0 8px;
-    color: #9ca3af;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-}
-
-/* Print Page */
-.print-page {
-    background: white;
-    padding: 10mm;
-    margin-bottom: 20px;
-    position: relative;
-    border: 1px dashed #ccc;
-}
-
-.page-number {
-    position: absolute;
-    top: 5px;
-    right: 10px;
-    background: #3b82f6;
-    color: white;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-/* Grid สำหรับแสดงบนหน้าจอ (3x3 = 9 กล่อง) */
-.slips-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8mm;
-    width: 100%;
-}
-
-/* Mini Salary Slip - Base */
-.salary-slip-mini {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 4px;
-    padding: 8px;
-    font-size: 9px;
-    break-inside: avoid;
-    min-height: 200px;
-    position: relative;
-}
-
-.salary-slip-mini.empty-slot {
-    border: 1px dashed #d1d5db;
-    background: transparent;
-    visibility: hidden;
-}
-
-/* Horizontal Layout - แนวนอน */
-.salary-slip-mini.horizontal-layout {
-    display: flex;
-    flex-direction: column;
-    border: 2px solid #3b82f6;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
-}
-
-/* ปุ่มขยายเต็มจอ */
-.expand-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s;
-    z-index: 10;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-.expand-btn:hover {
-    background: #2563eb;
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
-}
-
-/* Modal Close Button */
-.modal-close-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s;
-    z-index: 1001;
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
-    font-size: 24px;
-}
-
-.modal-close-btn:hover {
-    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-    transform: scale(1.1) rotate(90deg);
-    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.6);
-}
-
-.modal-close-btn:active {
-    transform: scale(0.95) rotate(90deg);
-}
-
-/* Modal Overlay */
-.modal-overlay {
+/* ============================================
+   SLIP MODAL STYLES - FIXED VERSION
+============================================ */
+.slip-modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.85);
+    inset: 0;
+    background: rgba(0, 0, 0, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
     padding: 20px;
     backdrop-filter: blur(4px);
-}
-
-.modal-content {
-    position: relative;
-    background: white;
-    border-radius: 20px;
-    max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-    width: 95%;
-    max-width: 900px;
-    padding: 40px;
-    animation: modalSlideIn 0.3s ease-out;
 }
 
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9) translateY(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
+/* FIXED: Slip Modal Content - ให้แสดงได้เต็ม */
+.slip-modal-content {
+    background: white;
+    border-radius: 0;
+    max-height: 95vh;
+    height: auto;
+    min-height: 600px;
+    width: 98vw;
+    max-width: 1200px;
+    padding: 30px;
+    overflow-y: auto;
+    overflow-x: auto;
+    position: relative;
 }
 
-/* Modal Slip Wrapper */
-.modal-slip-wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-}
-
-.modal-slip-wrapper .salary-slip-mini {
-    width: 100%;
-}
-
-/* Header Mini */
-.slip-header-mini {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    border-bottom: 2px solid #3b82f6;
-    padding-bottom: 6px;
-    margin-bottom: 8px;
-    padding-right: 40px;
-}
-
-.hospital-logo-mini img {
-    width: 25px;
-    height: 25px;
-    object-fit: contain;
-}
-
-.hospital-info-mini h2 {
-    font-size: 10px;
-    color: #1e40af;
-    margin: 0 0 2px 0;
-    font-weight: 700;
-}
-
-.hospital-info-mini p {
-    font-size: 8px;
-    color: #6b7280;
-    margin: 0;
-    font-weight: 500;
-}
-
-/* Body - แนวนอน 2 คอลัมน์ */
-.horizontal-layout .slip-body-mini {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    flex: 1;
-}
-
-/* Employee Info Mini */
-.employee-info-mini {
-    background: #f9fafb;
-    padding: 6px;
-    border-radius: 3px;
-}
-
-.horizontal-layout .employee-info-mini {
-    margin-bottom: 0;
-}
-
-.info-row-mini {
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 0;
-    font-size: 7px;
-    border-bottom: 1px solid #f3f4f6;
-}
-
-.info-row-mini:last-child {
-    border-bottom: none;
-}
-
-.info-row-mini .label-mini {
-    font-weight: 600;
-    color: #374151;
-}
-
-.info-row-mini .value-mini {
-    color: #1f2937;
-    font-weight: 600;
-    text-align: right;
-}
-
-/* Salary Details Mini */
-.salary-details-mini {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.section-title-mini {
-    font-size: 8px;
-    font-weight: 700;
-    color: #1e40af;
-    padding: 2px 4px;
-    background: #e0e7ff;
-    border-radius: 2px;
-    margin-bottom: 2px;
-}
-
-.horizontal-layout .salary-details-mini {
-    margin-bottom: 0;
-}
-
-.detail-row-mini {
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 4px;
-    border-radius: 2px;
-    font-size: 7px;
-}
-
-.detail-row-mini.income {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.detail-row-mini.expense {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.detail-row-mini span:first-child {
-    font-weight: 600;
-}
-
-.amount-mini {
-    font-weight: 700;
-}
-
-.total-row-mini {
-    background: #e5e7eb;
-    padding: 3px 4px;
-    border-radius: 2px;
-    font-weight: 700;
-    font-size: 7px;
-    margin-top: 2px;
-}
-
-/* Net Balance Mini */
-.net-balance-mini {
-    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
-    padding: 6px;
-    border-radius: 3px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.slip-modal-close-btn {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    background: #ef4444;
     color: white;
-    font-size: 9px;
-    font-weight: 700;
-    margin-top: auto;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    font-size: 24px;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
 }
 
-.net-amount-mini {
-    font-size: 10px;
-    font-weight: 800;
+.slip-modal-close-btn:hover {
+    background: #dc2626;
+    transform: scale(1.1);
 }
 
-/* Footer Mini */
-.slip-footer-mini {
+/* Note Layout - ไม่มีเส้นตาราง */
+.note-title-row,
+.note-header-row,
+.note-data-row {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 4px;
+    font-size: 6px;
+    line-height: 1.1;
+    flex-wrap: nowrap;
+    min-height: 10px;
+}
+
+.note-title-row {
+    font-weight: normal !important;
+    justify-content: center;
     text-align: center;
-    padding-top: 6px;
-    margin-top: 6px;
-    border-top: 1px solid #e5e7eb;
 }
 
-.slip-footer-mini p {
-    margin: 0;
-    color: #6b7280;
-    font-size: 7px;
-    font-style: italic;
+.note-header-row {
+    margin-bottom: 1px;
+    font-size: 6.5px;
+    font-weight: normal;
 }
 
-/* Modal Styles - ขยายขนาด */
-.modal-slip-wrapper .salary-slip-mini {
-    display: flex !important;
-    flex-direction: column !important;
+.note-label {
+    min-width: 25px;
+    max-width: 25px;
+    font-weight: 600;
+    text-align: left;
+    padding-right: 2px;
+    white-space: nowrap;
+    overflow: visible;
 }
 
-.modal-slip-wrapper .slip-header-mini {
-    padding-right: 0 !important;
-    gap: 10px !important;
-    padding-bottom: 10px !important;
-    margin-bottom: 15px !important;
+.note-col {
+    flex: 1;
+    text-align: center;
+    padding: 2px;
+    white-space: nowrap;
+    font-size: 6px;
+    font-weight: normal;
 }
 
-.modal-slip-wrapper .hospital-logo-mini img {
-    width: 50px !important;
-    height: 50px !important;
-}
-
-.modal-slip-wrapper .hospital-info-mini h2 {
-    font-size: 16px !important;
-}
-
-.modal-slip-wrapper .hospital-info-mini p {
-    font-size: 12px !important;
-}
-
-.modal-slip-wrapper .slip-body-mini {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 15px !important;
-}
-
-.modal-slip-wrapper .employee-info-mini {
-    padding: 10px !important;
-}
-
-.modal-slip-wrapper .info-row-mini {
-    padding: 5px 0 !important;
-    font-size: 13px !important;
-}
-
-.modal-slip-wrapper .section-title-mini {
-    font-size: 13px !important;
-    padding: 4px 6px !important;
-}
-
-.modal-slip-wrapper .detail-row-mini {
-    padding: 5px 8px !important;
-    font-size: 12px !important;
-}
-
-.modal-slip-wrapper .total-row-mini {
-    padding: 6px 8px !important;
-    font-size: 12px !important;
-}
-
-.modal-slip-wrapper .net-balance-mini {
-    padding: 10px !important;
+/* Modal Note Styles - ขนาดที่ปรับแล้ว */
+#modal-slip-wrapper .note-title-row,
+#modal-slip-wrapper .note-header-row,
+#modal-slip-wrapper .note-data-row {
     font-size: 14px !important;
+    line-height: 1.3 !important;
+    gap: 8px !important;
+    flex-wrap: nowrap !important;
+    min-height: 28px !important;
 }
 
-.modal-slip-wrapper .net-amount-mini {
-    font-size: 16px !important;
-}
-
-.modal-slip-wrapper .slip-footer-mini p {
+#modal-slip-wrapper .note-title-row {
+    font-weight: normal !important;
+    justify-content: center !important;
+    text-align: center !important;
     font-size: 11px !important;
 }
 
-/* Responsive */
-@media screen and (max-width: 768px) {
-    .print-container {
-        width: 100%;
-        padding: 15px;
-    }
-
-    .page-info {
-        margin-left: 0;
-        margin-right: 0;
-        font-size: 12px;
-    }
-
-    .slips-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 5mm !important;
-    }
+#modal-slip-wrapper .note-header-row {
+    margin-bottom: 3px !important;
+    font-weight: normal !important;
 }
 
-@media screen and (max-width: 480px) {
-    .print-actions {
-        flex-direction: column;
-        padding: 10px;
-        gap: 10px;
-    }
-
-    .btn-print,
-    .btn-back {
-        width: 100%;
-        max-width: 300px;
-    }
-
-    .slips-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 3mm !important;
-    }
-
-    .modal-content {
-        padding: 20px 15px;
-    }
-
-    .modal-slip-wrapper .slip-body-mini {
-        flex-direction: column !important;
-        gap: 10px !important;
-    }
+#modal-slip-wrapper .note-label {
+    min-width: 45px !important;
+    max-width: 45px !important;
+    font-size: 12px !important;
+    padding-right: 6px !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
 }
 
-/* --- New Slip Table Styles --- */
-.slip-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 8px; /* ขนาดฟอนต์เล็กสำหรับ mini slip */
-    table-layout: fixed;
+#modal-slip-wrapper .note-col {
+    padding: 4px !important;
+    font-size: 11px !important;
+    flex: 1 !important;
+    max-width: none !important;
+    width: auto !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
 }
 
-.slip-table thead th {
-    border: 1px solid #000;
-    padding: 3px 2px;
-    font-weight: 700;
-    text-align: center;
-    background: #f0f0f0;
+#modal-slip-wrapper .notes-cell {
+    padding: 6px 10px !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    height: 32px !important;
+    vertical-align: middle !important;
 }
 
-.slip-table tbody td,
-.slip-table tfoot td {
-    border: 1px solid #ddd;
-    padding: 2px;
-    height: 15px; /* กำหนดความสูงของแถว */
+/* Modal Slip Styling - แนวนอนเหมือนสลิปจริง (ปรับขนาดแล้ว) */
+#modal-slip-wrapper .slip-card {
+    width: 100% !important;
+    min-width: 750px !important;
+    margin: 0 auto;
+    padding: 25px !important;
+    font-size: 14px !important;
 }
 
-.slip-table .header-income {
-    background: #e0e7ff; /* สีฟ้าอ่อน */
-    border-bottom: none;
+#modal-slip-wrapper .slip-header {
+    display: grid !important;
+    grid-template-columns: 75px 1fr 240px !important;
+    gap: 20px !important;
+    padding-bottom: 15px !important;
+    margin-bottom: 5px !important;
+    align-items: start !important;
 }
 
-.slip-table .header-expense {
-    background: #ffe0e0; /* สีแดงอ่อน */
-    border-bottom: none;
+#modal-slip-wrapper .logo-section {
+    grid-column: 1 !important;
 }
 
-.slip-table .col-seq {
-    width: 5%; /* ลำดับที่ */
-    text-align: center;
+#modal-slip-wrapper .logo-slip {
+    width: 70px !important;
+    height: auto !important;
 }
 
-.slip-table .col-label {
-    width: 25%; /* รายการ */
-    padding-left: 5px !important;
+#modal-slip-wrapper .header-text {
+    grid-column: 2 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    text-align: flex !important;
+    gap: 4px !important;
 }
 
-.slip-table .col-amount {
-    width: 15%; /* จำนวนเงิน */
-    text-align: right;
-    padding-right: 5px !important;
-    font-weight: 600;
+#modal-slip-wrapper .header-text h3 {
+    font-size: 19px !important;
+    margin: 0 0 4px 0 !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+    display: flex !important;
 }
 
-.slip-table .col-note {
-    width: 5%; /* หมายเหตุ (ว่างในภาพ) */
+#modal-slip-wrapper .header-text p {
+    font-size: 18px !important;
+    margin: 2px 0 !important;
+    line-height: 1.4 !important;
 }
 
-/* Footer Row */
-.slip-table .total-row td {
-    border-top: 2px solid #000;
-    font-weight: 700;
-    background: #f9fafb;
+#modal-slip-wrapper .header-info {
+    grid-column: 3 !important;
+    font-size: 18px !important;
+    line-height: 1.6 !important;
+    display: flex-start !important;
 }
 
-.slip-table .total-label {
-    text-align: right;
+#modal-slip-wrapper .header-info p {
+    align-items: flex-start;
+    justify-content: flex-start;
 }
-/* --- End New Slip Table Styles --- */
-/* Print Styles */
+
+#modal-slip-wrapper .slip-table {
+    font-size: 14px !important;
+    width: 100% !important;
+}
+
+#modal-slip-wrapper .slip-table .main-header th {
+    font-size: 16px !important;
+    padding: 10px !important;
+    font-weight: 700 !important;
+}
+
+#modal-slip-wrapper .slip-table .sub-header th {
+    font-size: 14px !important;
+    padding: 8px 6px !important;
+}
+
+#modal-slip-wrapper .slip-table thead th {
+    padding: 8px 6px !important;
+    font-size: 14px !important;
+}
+
+#modal-slip-wrapper .slip-table tbody td {
+    padding: 6px 6px !important;
+    height: 32px !important;
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    vertical-align: middle !important;
+}
+
+#modal-slip-wrapper .slip-table tfoot td {
+    padding: 10px 6px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+}
+
+#modal-slip-wrapper .slip-table .label {
+    padding-left: 10px !important;
+    font-size: 14px !important;
+}
+
+#modal-slip-wrapper .slip-table .amount {
+    padding-right: 10px !important;
+    font-size: 14px !important;
+}
+
+/* ============================================
+   PRINT MEDIA QUERY
+============================================ */
 @media print {
-    body {
+    body, .print-container {
         margin: 0;
         padding: 0;
         background: white;
     }
 
-    .print-container {
-        max-width: 100%;
-        padding: 0;
-        background: white;
-        width: 100%;
-    }
-
-    .no-print {
-        display: none !important;
-    }
-
-    .screen-only {
+    .no-print, .screen-only {
         display: none !important;
     }
 
     .print-all-pages {
         display: block !important;
-        visibility: visible !important;
+    }
+
+    @page {
+        size: A4 portrait;
+        margin: 10mm;
     }
 
     .print-page {
         page-break-after: always;
         page-break-inside: avoid;
-        padding: 10mm;
-        border: none;
+        display: flex;
+        flex-direction: column;
+        gap: 15mm;
+        padding: 0;
     }
 
     .print-page:last-child {
         page-break-after: auto;
     }
 
-    .print-all-pages .slips-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 15mm;
-    }
-
-    .print-all-pages .salary-slip-mini {
-        display: flex !important;
-        flex-direction: column !important;
-        visibility: visible !important;
+    .slip-card {
         border: 2px solid #000 !important;
-        background: white !important;
-        page-break-inside: avoid !important;
         padding: 15px !important;
-        margin-bottom: 0 !important;
-        font-size: 12px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
+        page-break-inside: avoid !important;
         box-shadow: none !important;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 190mm;
     }
 
-    .print-all-pages .slip-header-mini {
-        gap: 10px !important;
-        padding-bottom: 10px !important;
-        margin-bottom: 15px !important;
+    .slip-table { font-size: 11px !important; }
+    .header-text h3 { font-size: 13px !important; }
+
+    .slip-table .total-row td {
+        font-size: 10px !important;
+    }
+    
+    .slip-table .net-row td {
+        font-size: 10px !important; /* ใหญ่ชัดเจนในกระดาษ A4 */
+        background-color: #e5e7eb !important;
+
     }
 
-    .print-all-pages .hospital-logo-mini img {
-        width: 50px !important;
-        height: 50px !important;
+    .note-title-row {
+        font-size: 7px !important;
     }
 
-    .print-all-pages .hospital-info-mini h2 {
-        font-size: 14px !important;
+    .note-col {
+        font-size: 7px !important;
     }
 
-    .print-all-pages .hospital-info-mini p {
-        font-size: 11px !important;
-    }
-
-    .print-all-pages .slip-body-mini {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 15px !important;
-    }
-
-    .print-all-pages .info-row-mini,
-    .print-all-pages .detail-row-mini {
-        font-size: 11px !important;
-        padding: 4px 0 !important;
-    }
-
-    .print-all-pages .section-title-mini {
-        font-size: 11px !important;
-    }
-
-    .print-all-pages .total-row-mini {
-        font-size: 11px !important;
-    }
-
-    .print-all-pages .net-balance-mini {
-        padding: 10px !important;
-        font-size: 13px !important;
-    }
-
-    .print-all-pages .net-amount-mini {
-        font-size: 15px !important;
-    }
-
-    .salary-slip-mini.empty-slot {
+    .expand-btn {
         display: none !important;
     }
+}
 
-    @page {
-        size: A4 portrait;
-        margin: 10mm;
+/* ============================================
+   RESPONSIVE DESIGN
+============================================ */
+@media screen and (max-width: 1024px) {
+    .slips-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    /* Slip Modal Responsive */
+    .slip-modal-content {
+        width: 98vw;
+        padding: 20px;
+        min-height: 500px;
+    }
+    
+    #modal-slip-wrapper .slip-card {
+        padding: 20px !important;
+        min-width: 700px !important;
+    }
+    
+    #modal-slip-wrapper .slip-header {
+        grid-template-columns: 65px 1fr 200px !important;
+        gap: 15px !important;
+    }
+    
+    #modal-slip-wrapper .logo-slip {
+        width: 60px !important;
+    }
+    
+    #modal-slip-wrapper .header-text h3 {
+        font-size: 17px !important;
+    }
+    
+    #modal-slip-wrapper .header-text p {
+        font-size: 13px !important;
+    }
+    
+    #modal-slip-wrapper .slip-table {
+        font-size: 11px !important;
+    }
+    
+    #modal-slip-wrapper .slip-table tbody td {
+        font-size: 10px !important;
+        padding: 6px 5px !important;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .slips-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px;
+    }
+
+    .slip-card {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    /* Slip Modal Mobile */
+    .slip-modal-content {
+        width: 95vw;
+        padding: 15px;
+        min-height: 400px;
+    }
+    
+    .slip-modal-close-btn {
+        top: 15px;
+        right: 15px;
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+    }
+    
+    #modal-slip-wrapper .slip-card {
+        min-width: 650px !important;
+        padding: 20px !important;
+    }
+    
+    #modal-slip-wrapper .slip-header {
+        grid-template-columns: 60px 1fr 180px !important;
+        gap: 12px !important;
+    }
+    
+    #modal-slip-wrapper .slip-table {
+        font-size: 10px !important;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .print-actions {
+        flex-direction: column;
+    }
+
+    .btn-print, .btn-back {
+        width: 100%;
+    }
+
+    .page-info {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .slip-modal-content {
+        width: 100vw;
+        padding: 10px;
+        border-radius: 0;
+    }
+    
+    .slip-modal-close-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        top: 10px;
+        right: 10px;
     }
 }

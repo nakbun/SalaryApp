@@ -1,13 +1,12 @@
-// Main App
+// app.js
+
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 🔴 ส่วนที่เพิ่ม: ล้างข้อมูล LocalStorage (ของระบบเก่าหรือที่ค้างอยู่) ทิ้งทันที
-    // เพื่อให้แน่ใจว่าการ Login จะพึ่งพาแค่ SessionStorage (ที่หายเมื่อปิดแท็บ) เท่านั้น
+    // ล้างข้อมูล LocalStorage
     if (localStorage.getItem('token') || localStorage.getItem('user')) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        localStorage.removeItem('printEmployees'); // ล้างข้อมูลพิมพ์สลิปด้วย (ถ้ามี)
-        console.log('Old session data cleared from LocalStorage.');
+        localStorage.removeItem('printEmployees');
     }
 
     // Load CSS files
@@ -16,7 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
         '/SalaryApp/src/components/SalarySystem.css',
         '/SalaryApp/src/components/SalarySlip.css',
         '/SalaryApp/src/components/AddSalary.css',
-        '/SalaryApp/src/index.css'
+        '/SalaryApp/src/index.css',
+        '/SalaryApp/src/components/dashboard.css'  // ← ตรวจสอบว่าไฟล์มีจริง
     ];
     
     cssFiles.forEach(href => {
@@ -29,8 +29,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Setup routes
     router.route('/', renderLoginPage, false);
     router.route('/home', renderSalarySystem, true);
-    router.route('/salaryslip', renderSalarySlip, true);
+    router.route('/salaryslip', window.renderSalarySlip, true);
     router.route('/addsalary', renderAddSalary, true);
+    
+    // 🔴 แก้ตรงนี้ - เพิ่ม handler ให้ dashboard
+    router.route('/dashboard', window.renderDashboard, true);
+    
     router.route('*', () => {
         router.navigate('/', true);
     });
