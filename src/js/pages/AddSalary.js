@@ -19,19 +19,19 @@ const months = [
     { value: "ธันวาคม", label: "ธันวาคม" }
 ];
 
-window.renderAddSalary = function() {
+window.renderAddSalary = function () {
     const user = Auth.getCurrentUser();
     if (!user) {
         router.navigate('/', true);
         return;
     }
-    
+
     const currentYear = new Date().getFullYear() + 543;
     const years = [];
     for (let i = currentYear - 5; i <= currentYear + 2; i++) {
         years.push(i);
     }
-    
+
     const root = document.getElementById('root');
     root.innerHTML = `
         <div class="salary-container">
@@ -138,7 +138,7 @@ window.renderAddSalary = function() {
             </div>
         </div>
     `;
-    
+
     // Event listeners
     const monthSelect = document.getElementById('month-select');
     const yearSelect = document.getElementById('year-select');
@@ -147,7 +147,7 @@ window.renderAddSalary = function() {
     const monthIndicator = document.getElementById('month-indicator');
     const yearIndicator = document.getElementById('year-indicator');
     const fileIndicator = document.getElementById('file-indicator');
-    
+
     monthSelect.addEventListener('change', (e) => {
         selectedMonth = e.target.value;
         if (selectedMonth) {
@@ -158,7 +158,7 @@ window.renderAddSalary = function() {
         }
         updateUploadButton();
     });
-    
+
     yearSelect.addEventListener('change', (e) => {
         selectedYear = e.target.value;
         if (selectedYear) {
@@ -169,7 +169,7 @@ window.renderAddSalary = function() {
         }
         updateUploadButton();
     });
-    
+
     fileInput.addEventListener('change', (e) => {
         file = e.target.files[0];
         if (file) {
@@ -180,9 +180,9 @@ window.renderAddSalary = function() {
         }
         updateUploadButton();
     });
-    
+
     uploadButton.addEventListener('click', handleUpload);
-    
+
     function updateUploadButton() {
         uploadButton.disabled = !file || !selectedMonth || !selectedYear || loading;
     }
@@ -193,11 +193,11 @@ async function handleUpload() {
         alert('กรุณาเลือกไฟล์ เดือน และปีก่อนอัปโหลด!');
         return;
     }
-    
+
     loading = true;
     const uploadButton = document.getElementById('upload-button');
     const uploadMessage = document.getElementById('upload-message');
-    
+
     uploadButton.disabled = true;
     uploadButton.innerHTML = `
         <div class="spinner"></div>
@@ -208,28 +208,22 @@ async function handleUpload() {
         <div class="message-spinner"></div>
         <span>⏳ กำลังอัปโหลดและบันทึกข้อมูล...</span>
     `;
-    
+
     try {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('month', selectedMonth);
         formData.append('year', selectedYear);
-        formData.append('action', 'upload'); // เพิ่มตัวนี้
-        
-        console.log('Uploading file:', file.name);
-        console.log('Month:', selectedMonth);
-        console.log('Year:', selectedYear);
-        
-        // เปลี่ยน URL ตรงนี้ - ไม่ต้องมี /upload
-        const data = await API.upload(API.baseURL, formData);
-        
+
+        // ✅ แก้ตรงนี้ - ส่ง 'upload' เป็น action
+        const data = await API.upload('upload', formData);
+
         if (data.status === 'success') {
             showAddSalaryModal(true, {
                 totalRows: data.rows,
                 savedRows: data.saved || data.rows,
                 message: `บันทึกข้อมูลเดือน ${selectedMonth} ${selectedYear} เรียบร้อย`
             });
-            
             setTimeout(() => {
                 router.navigate('/home', true);
             }, 3000);
@@ -261,11 +255,11 @@ function showAddSalaryModal(success, data) {
     const modalIcon = document.getElementById('modal-icon');
     const modalBodyContent = document.getElementById('modal-body-content');
     const modalFooterButton = document.getElementById('modal-footer-button');
-    
+
     modalHeader.className = `modal-header ${success ? 'success' : 'error'}`;
     modalTitle.textContent = success ? 'สำเร็จ!' : 'ผิดพลาด!';
     modalIcon.textContent = success ? '✓' : '✕';
-    
+
     if (success) {
         modalBodyContent.innerHTML = `
             <div class="modal-success-content">
@@ -306,14 +300,14 @@ function showAddSalaryModal(success, data) {
         modalFooterButton.className = 'modal-footer-button error';
         modalFooterButton.textContent = '🔄 ลองอีกครั้ง';
     }
-    
+
     modalOverlay.style.display = 'flex';
 }
 
-window.closeAddSalaryModal = function() {
+window.closeAddSalaryModal = function () {
     const modalOverlay = document.getElementById('modal-overlay');
     modalOverlay.style.display = 'none';
-    
+
     const modalData = document.getElementById('modal-header').classList.contains('success');
     if (modalData) {
         // Reset form

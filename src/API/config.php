@@ -2,10 +2,15 @@
 // ==========================
 // Database Configuration
 // ==========================
-define('DB_HOST', '10.0.0.11');
-define('DB_USER', 'admintoy');
-define('DB_PASS', 'Gotoyt@y1@y2522');
-define('DB_NAME', 'hrd_salary');
+// define('DB_HOST', '10.0.0.11');
+// define('DB_USER', 'admintoy');
+// define('DB_PASS', 'Gotoyt@y1@y2522');
+// define('DB_NAME', 'hrd_salary');
+
+define('DB_HOST', '127.0.0.1');
+define('DB_USER', 'root');
+define('DB_PASS', "1234");
+define('DB_NAME', 'salary_db');
 
 // ==========================
 // Upload Configuration

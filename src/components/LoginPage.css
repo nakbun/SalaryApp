@@ -37,7 +37,7 @@
   border-radius: 2px;
   object-fit: contain;
   display: flex;
-  
+
 }
 
 .login-page .decorative-circle-1 {
@@ -125,6 +125,80 @@
   margin: 0 auto;
 }
 
+.login-subtitle {
+  color: #666;
+  font-size: 0.9em;
+  margin-top: 8px;
+  font-weight: 400;
+}
+
+.login-footer {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.help-text {
+  color: #6b7280;
+  font-size: 0.85em;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.toggle-button {
+  cursor: pointer;
+  outline: none;
+}
+
+.toggle-button:hover {
+  opacity: 0.7;
+}
+
+/* Focus states for better UX */
+.input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.submit-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Animation for error message */
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-10px);
+  }
+
+  75% {
+    transform: translateX(10px);
+  }
+}
+
+.error-message {
+  animation: shake 0.3s ease-in-out;
+}
+
 /* ============ Right Panel ============ */
 .login-page .right-panel {
   flex: 1;
@@ -187,6 +261,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -351,6 +426,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -361,19 +437,19 @@
   .login-page {
     flex-direction: column;
   }
-  
+
   .login-page .left-panel {
     min-height: 40vh;
   }
-  
+
   .login-page .brand-title {
     font-size: 36px;
   }
-  
+
   .login-page .brand-subtitle {
     font-size: 16px;
   }
-  
+
   .login-page .login-title {
     font-size: 28px;
   }
@@ -383,15 +459,15 @@
   .login-page .right-panel {
     padding: 20px;
   }
-  
+
   .login-page .login-box {
     max-width: 100%;
   }
-  
+
   .login-page .brand-title {
     font-size: 32px;
   }
-  
+
   .login-page .login-title {
     font-size: 24px;
   }

@@ -266,7 +266,7 @@ if ($action === 'salary-data' || $action === 'get_data') {
         if (!empty($params['year'])) { $sql .= " AND `year` = :year"; $bind[':year'] = $params['year']; }
         if (!empty($params['employee'])) { $sql .= " AND `employee` = :employee"; $bind[':employee'] = $params['employee']; }
 
-        $sql .= " ORDER BY `year` DESC, `month` DESC LIMIT 1000";
+        $sql .= " ORDER BY `year` DESC, `month` DESC";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute($bind);

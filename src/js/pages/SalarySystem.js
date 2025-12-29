@@ -1,4 +1,4 @@
-// SalarySystem.js (Final Polish: Pagination Text)
+// SalarySystem.js - Role-based Access (ADMIN + นักวิชาการเงินและบัญชี)
 
 let currentPage = 1;
 let results = [];
@@ -7,14 +7,57 @@ let availableYears = [];
 const itemsPerPage = 20;
 
 // ==========================================
+// HELPER: ตรวจสอบสิทธิ์แบบ Admin
+// ==========================================
+function hasAdminPrivileges(user) {
+    if (!user) {
+        return false;
+    }
+
+    // 1. ตรวจสอบ status = 'ADMIN'
+    const status = String(user.status || '').toUpperCase();
+    if (status === 'ADMIN') {
+        return true;
+    }
+
+    // 2. ตรวจสอบตำแหน่ง = 'นักวิชาการเงินและบัญชี'
+    const posname = String(user.posname || '');
+    if (posname.includes('นักวิชาการเงินและบัญชี')) {
+        return true;
+    }
+
+    return false;
+}
+// ==========================================
 // 1. MAIN RENDER FUNCTION
 // ==========================================
-window.renderSalarySystem = function () {
+window.renderSalarySystem = async function () {
+
+    // ตรวจสอบ sessionStorage
+    const userStr = sessionStorage.getItem('user');
+    const token = sessionStorage.getItem('token');
+
     const user = Auth.getCurrentUser();
-    if (!user) { router.navigate('/', true); return; }
+
+    if (!user) {
+        router.navigate('/', true);
+        return;
+    }
 
     const root = document.getElementById('root');
     if (!root) return;
+
+    // ดึงข้อมูลจาก user object
+    const positionDisplay = user.posname || 'ไม่ระบุตำแหน่ง';
+    const statusDisplay = user.status || 'USER';
+
+    // ตรวจสอบสิทธิ์แบบ Admin (ADMIN หรือ นักวิชาการเงินและบัญชี)
+    const isAdmin = hasAdminPrivileges(user);
+
+    // กำหนด icon และ label ตามสิทธิ์
+    const userIcon = isAdmin ? '👑' : '👤';
+    const userRole = user.status || 'USER';
+    const userRoleDisplay = isAdmin ? 'ADMIN (จากตำแหน่ง)' : user.status || 'USER';
 
     // โครงสร้าง HTML หลัก
     root.innerHTML = `
@@ -28,19 +71,53 @@ window.renderSalarySystem = function () {
                     </div>
                 </div>
                 <div class="header-right">
-                    <button class="btn btn-green" id="add-new-btn">✚ เพิ่มข้อมูล</button>
+                    ${isAdmin ? `<button class="btn btn-green" id="add-new-btn">✚ เพิ่มข้อมูล</button>` : ''}
                     <div class="profile-section" id="profile-section">
                         <button class="profile-button" id="profile-button">
-                            <div class="profile-avatar">👤</div>
-                            <div class="profile-info"><div class="profile-cid">CID: ${user.cid}</div><div class="profile-name">${user.name}</div></div>
+                            <div class="profile-avatar">${userIcon}</div>
+                            <div class="profile-info">
+                                <div class="profile-name">${user.firstname} ${user.lastname}</div>
+                                <div class="profile-position">${positionDisplay}</div>
+                            </div>
                             <span class="profile-dropdown-icon">▼</span>
                         </button>
                         <div class="profile-dropdown" id="profile-dropdown" style="display: none;">
-                            <div class="dropdown-header"><div class="dropdown-avatar">👤</div><div class="dropdown-name">${user.name}</div><div class="dropdown-position">ผู้ใช้งาน</div></div>
+                            <div class="dropdown-header">
+                                <div class="dropdown-avatar">${userIcon}</div>
+                                <div class="dropdown-name">
+                                    ${user.firstname} ${user.lastname}
+                                </div>
+                            </div>
                             <div class="dropdown-body">
-                                <div class="dropdown-item"><span>CID: ${user.cid}</span></div>
+                                <div class="dropdown-item">
+                                    <span class="dropdown-label">ตำแหน่ง:</span>
+                                    <span>${positionDisplay || '-'}</span>
+                                </div>
+                                <div class="dropdown-item">
+                                    <span class="dropdown-label">เลขประจำตัว:</span>
+                                    <span>${user.cid || '-'}</span>
+                                </div>
+                                <div class="dropdown-item">
+                                    <span class="dropdown-label">สถานะ:</span>
+                                    <span class="badge-${user.status}">${user.status}</span>
+                                </div>
+                                ${isAdmin && user.status !== 'ADMIN' ? `
+                                <div class="dropdown-item">
+                                    <span class="dropdown-label">สิทธิ์การใช้งาน:</span>
+                                    <span class="badge-admin">ADMIN (จากตำแหน่ง)</span>
+                                </div>
+                                ` : ''}
+                                ${!isAdmin ? `
                                 <div class="dropdown-divider"></div>
-                                <div class="dropdown-item dropdown-logout" id="logout-btn"><span>ออกจากระบบ</span></div>
+                                <div class="dropdown-info-box">
+                                    <div class="info-icon">ℹ️</div>
+                                    <div class="info-text">คุณสามารถดูข้อมูลเงินเดือนของตัวเองได้เท่านั้น</div>
+                                </div>
+                                ` : ''}
+                                <div class="dropdown-divider"></div>
+                                <div class="dropdown-item dropdown-logout" id="logout-btn">
+                                    <span>🚪 ออกจากระบบ</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -51,9 +128,10 @@ window.renderSalarySystem = function () {
                 <h2 class="section-title">
                     <span class="icon">🔍</span>
                     <span class="title">ค้นหาข้อมูลเงินเดือน</span>
-                    <button class="report-btn" id="dashboard-btn">รายงานผล</button>
+                    ${isAdmin ? `<button class="report-btn" id="dashboard-btn">📊 รายงานผล</button>` : ''}
                 </h2>
                 <div class="search-inputs-container">
+                    ${isAdmin ? `
                     <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
                         <div class="form-group" style="flex: 1; min-width: 200px;">
                             <label>เลขประจำตัว</label>
@@ -64,6 +142,7 @@ window.renderSalarySystem = function () {
                             <input type="text" id="search-name" class="input-field" placeholder="กรอกชื่อ หรือนามสกุล" style="width: 100%;" />
                         </div>
                     </div>
+                    ` : ''}
                     <div class="form-row" style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap;">
                         <div class="form-group" style="flex: 1; min-width: 200px;">
                             <label>เดือน</label>
@@ -74,11 +153,6 @@ window.renderSalarySystem = function () {
                             <select id="search-year" class="input-field" style="width: 100%;"><option value="">ทุกปี</option></select>
                         </div>
                     </div>
-                </div>
-                <div class="tab-buttons">
-                    <button class="tab-btn active" data-tab="all">ทั้งหมด</button>
-                    <button class="tab-btn" data-tab="government">ข้าราชการ</button>
-                    <button class="tab-btn" data-tab="employee">ลูกจ้างเงินเดือน</button>
                 </div>
                 <button class="btn btn-dangerous" id="reset-btn"><span>✕</span><span>ล้างผลการค้นหา</span></button>
             </div>
@@ -96,9 +170,53 @@ window.renderSalarySystem = function () {
                 <div id="main-content-area"></div>
             </div>
         </div>
+
+        <style>
+            /* Info Box for USER */
+            .dropdown-info-box {
+                background: #e3f2fd;
+                border-left: 4px solid #2196f3;
+                padding: 12px;
+                margin: 10px 0;
+                border-radius: 4px;
+                display: flex;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            .info-icon {
+                font-size: 1.2em;
+                flex-shrink: 0;
+            }
+
+            .info-text {
+                font-size: 0.85em;
+                color: #1565c0;
+                line-height: 1.4;
+            }
+
+            /* Badge Styles */
+            .badge-admin {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 0.75em;
+                font-weight: 600;
+            }
+
+            .badge-user {
+                background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+                color: white;
+                padding: 4px 12px;
+                border-radius: 12px;
+                font-size: 0.75em;
+                font-weight: 600;
+            }
+        </style>
     `;
 
-    setupEventListeners();
+    setupEventListeners(isAdmin);
     fetchAvailableFilters();
     fetchSalaryData();
 }
@@ -106,57 +224,64 @@ window.renderSalarySystem = function () {
 // ==========================================
 // 2. HELPER FUNCTIONS
 // ==========================================
-function setupEventListeners() {
+function setupEventListeners(isAdmin) {
     const safeOn = (id, evt, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(evt, fn); };
 
-    safeOn('add-new-btn', 'click', () => router.navigate('/addsalary'));
+    // ปุ่มเพิ่มข้อมูล (เฉพาะ Admin)
+    if (isAdmin) {
+        safeOn('add-new-btn', 'click', () => router.navigate('/addsalary'));
+        safeOn('dashboard-btn', 'click', () => router.navigate('/dashboard'));
+    }
+
     safeOn('logout-btn', 'click', () => Auth.logout());
-    safeOn('dashboard-btn', 'click', () => router.navigate('/dashboard'));
 
     const pBtn = document.getElementById('profile-button');
     const pDrop = document.getElementById('profile-dropdown');
     if (pBtn && pDrop) {
-        pBtn.addEventListener('click', (e) => { e.stopPropagation(); pDrop.style.display = pDrop.style.display === 'block' ? 'none' : 'block'; });
-        document.addEventListener('click', (e) => { if (!e.target.closest('#profile-section')) pDrop.style.display = 'none'; });
+        pBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            pDrop.style.display = pDrop.style.display === 'block' ? 'none' : 'block';
+        });
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#profile-section')) pDrop.style.display = 'none';
+        });
     }
 
     let timeout;
     const runSearch = () => {
         const f = {};
-        const cid = document.getElementById('search-cid'), name = document.getElementById('search-name'),
-            m = document.getElementById('search-month'), y = document.getElementById('search-year');
-        if (cid?.value) f.cid = cid.value;
-        if (name?.value) f.name = name.value;
+
+        // Admin ค้นหาได้ทั้ง CID และชื่อ
+        if (isAdmin) {
+            const cid = document.getElementById('search-cid');
+            const name = document.getElementById('search-name');
+            if (cid?.value) f.cid = cid.value;
+            if (name?.value) f.name = name.value;
+        }
+
+        // ทุกคนค้นหาได้เดือน/ปี
+        const m = document.getElementById('search-month');
+        const y = document.getElementById('search-year');
         if (m?.value) f.month = m.value;
         if (y?.value) f.year = y.value;
 
-        const activeTab = document.querySelector('.tab-btn.active');
-        if (activeTab) {
-            const t = activeTab.dataset.tab;
-            if (t === 'government') f.employee = 'ข้าราชการ';
-            if (t === 'employee') f.employee = 'ลูกจ้างเงินเดือน';
-        }
         currentPage = 1;
         fetchSalaryData(f);
     };
 
-    ['search-cid', 'search-name', 'search-month', 'search-year'].forEach(id => {
+    // กำหนด search fields ตามสิทธิ์
+    const searchFields = isAdmin
+        ? ['search-cid', 'search-name', 'search-month', 'search-year']
+        : ['search-month', 'search-year'];
+
+    searchFields.forEach(id => {
         safeOn(id, 'input', () => { clearTimeout(timeout); timeout = setTimeout(runSearch, 300); });
     });
 
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            runSearch();
-        });
-    });
-
     safeOn('reset-btn', 'click', () => {
-        ['search-cid', 'search-name', 'search-month', 'search-year'].forEach(id => { if (document.getElementById(id)) document.getElementById(id).value = ''; });
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        const all = document.querySelector('.tab-btn[data-tab="all"]');
-        if (all) all.classList.add('active');
+        searchFields.forEach(id => {
+            if (document.getElementById(id)) document.getElementById(id).value = '';
+        });
         runSearch();
     });
 
@@ -169,14 +294,47 @@ function setupEventListeners() {
 
 async function fetchAvailableFilters() {
     try {
-        const data = await API.get('available-filters');
+        const user = Auth.getCurrentUser();
+        const isAdmin = hasAdminPrivileges(user);
+        
+        // สร้าง filters สำหรับดึงข้อมูลที่มีอยู่จริง
+        const filterParams = {};
+        
+        // ถ้าไม่ใช่ Admin ให้กรองตาม CID ของ user
+        if (!isAdmin) {
+            const userCID = user.cid || user.idcard || user.ref_l_id;
+            if (userCID) {
+                filterParams.user_cid = userCID;
+            }
+        }
+        
+        const data = await API.get('available-filters', filterParams);
         if (data.status === 'success') {
             const mSel = document.getElementById('search-month');
             const ySel = document.getElementById('search-year');
-            if (mSel) (data.months || []).forEach(m => { const o = document.createElement('option'); o.value = m.value; o.textContent = m.label; mSel.appendChild(o); });
-            if (ySel) (data.years || []).forEach(y => { const o = document.createElement('option'); o.value = y; o.textContent = y; ySel.appendChild(o); });
+            
+            // เคลียร์ options เดิม (เหลือแต่ตัวเลือก "ทุกเดือน" และ "ทุกปี")
+            if (mSel) {
+                mSel.innerHTML = '<option value="">ทุกเดือน</option>';
+                (data.months || []).forEach(m => {
+                    const o = document.createElement('option');
+                    o.value = m.value;
+                    o.textContent = m.label;
+                    mSel.appendChild(o);
+                });
+            }
+            
+            if (ySel) {
+                ySel.innerHTML = '<option value="">ทุกปี</option>';
+                (data.years || []).forEach(y => {
+                    const o = document.createElement('option');
+                    o.value = y;
+                    o.textContent = y;
+                    ySel.appendChild(o);
+                });
+            }
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { }
 }
 
 async function fetchSalaryData(filters = {}) {
@@ -191,16 +349,49 @@ async function fetchSalaryData(filters = {}) {
     if (content) content.innerHTML = '';
 
     try {
+        const user = Auth.getCurrentUser();
+        const isAdmin = hasAdminPrivileges(user);
+
+        // ลองหา CID จากหลายฟิลด์ที่เป็นไปได้
+        const userCID = user.cid || user.idcard || user.ref_l_id;
+
+        if (!isAdmin) {
+            if (!userCID) {
+                throw new Error('ไม่พบเลขประจำตัวประชาชน (cid/idcard/ref_l_id)\nกรุณาติดต่อผู้ดูแลระบบ');
+            }
+
+            // ลบ parameter ที่ไม่ควรมี
+            delete filters.cid;
+            delete filters.name;
+
+            // ส่ง user_cid ไปยัง Backend
+            filters.user_cid = userCID;
+        } else {
+            delete filters.user_cid;
+        }
+
         const data = await API.get('salary-data', filters);
+
         if (data.status === 'success') {
             results = data.data || [];
+
+            // Double check ฝั่ง Frontend (Security Layer 2)
+            if (!isAdmin && userCID) {
+                const before = results.length;
+                results = results.filter(row => row.cid === userCID);
+            }
+
             renderContent();
         } else {
-            throw new Error(data.message);
+            throw new Error(data.message || data.error || 'เกิดข้อผิดพลาด');
         }
     } catch (err) {
-        if (errBox) { errBox.style.display = 'block'; errBox.innerHTML = `<span>⚠️</span> ${err.message}`; }
+        if (errBox) {
+            errBox.style.display = 'block';
+            errBox.innerHTML = `<span>⚠️</span> ${err.message}`;
+        }
         results = [];
+        renderContent();
     } finally {
         if (loader) loader.style.display = 'none';
     }
@@ -209,8 +400,6 @@ async function fetchSalaryData(filters = {}) {
 // ==========================================
 // 3. RENDER CONTENT (TABLE + PAGINATION)
 // ==========================================
-// ในไฟล์ SalarySystem.js
-
 function renderContent() {
     const container = document.getElementById('main-content-area');
     const noResults = document.getElementById('no-results');
@@ -219,15 +408,14 @@ function renderContent() {
 
     if (!container) return;
 
-    // 🔴 1. อัปเดตจำนวนรายการทันที (ไว้บนสุดเลย เพื่อให้เลขเปลี่ยนเสมอ)
+    // อัปเดตจำนวนรายการ
     if (header) header.innerHTML = `📋 ผลการค้นหา (พบ ${results.length} รายการ)`;
 
-    // 2. กรณีไม่มีข้อมูล (0 รายการ)
+    // กรณีไม่มีข้อมูล
     if (results.length === 0) {
         if (noResults) noResults.style.display = 'block';
         if (printBtn) printBtn.style.display = 'none';
 
-        // แสดงข้อความ 0 ถึง 0 ให้ชัดเจน
         container.innerHTML = `
             <div style="text-align: center; margin-top: 20px; color: #666; font-size: 0.9em;">
                 แสดงรายการที่ 0 ถึง 0 จากทั้งหมด 0 รายการ
@@ -236,7 +424,7 @@ function renderContent() {
         return;
     }
 
-    // 3. กรณีมีข้อมูล
+    // กรณีมีข้อมูล
     if (noResults) noResults.style.display = 'none';
     if (printBtn) printBtn.style.display = 'block';
 
@@ -251,25 +439,25 @@ function renderContent() {
         <table class="salary-table" style="width:100%; margin-bottom: 20px;">
             <thead>
                 <tr>
-                    <th>ลำดับ</th><th>ชื่อ-นามสกุล</th><th>ประเภท</th>
-                    <th>เลขประจำตัว</th><th>บัญชี</th><th>เดือน/ปี</th>
-                    <th>รับ</th><th>จ่าย</th><th>คงเหลือ</th><th>พิมพ์</th>
+                    <th>ลำดับ</th>
+                    <th>ชื่อ-นามสกุล</th>
+                    <th>เลขประจำตัว</th>
+                    <th>บัญชี</th>
+                    <th>เดือน/ปี</th>
+                    <th>รับ</th>
+                    <th>จ่าย</th>
+                    <th>คงเหลือ</th>
+                    <th>พิมพ์</th>
                 </tr>
             </thead>
             <tbody>
     `;
 
     currentData.forEach((row, i) => {
-        let badgeClass = 'badge-gray';
-        const type = (row.employee || '').trim();
-        if (type === 'ข้าราชการ') badgeClass = 'badge-government';
-        else if (type === 'ลูกจ้างเงินเดือน' || type === 'ลูกจ้าง') badgeClass = 'badge-employee';
-
         html += `
             <tr>
                 <td>${start + i + 1}</td>
                 <td>${row.name || '-'}</td>
-                <td><span class="badge ${badgeClass}">${row.employee || 'ไม่ระบุ'}</span></td>
                 <td>${row.cid || '-'}</td>
                 <td>${row.bank_account || '-'}</td>
                 <td>${Utils.getThaiMonthName(row.month)} ${row.year || ''}</td>
@@ -336,4 +524,4 @@ window.printEmployee = function (index) {
         sessionStorage.setItem('printEmployees', JSON.stringify([results[index]]));
         router.navigate('/salaryslip');
     }
-};
+};  

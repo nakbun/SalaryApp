@@ -4,8 +4,6 @@
 // ===============================
 
 // 1. เปลี่ยนการเรียก Library เป็น PHPExcel
-// ตรวจสอบ path ของ PHPExcel ให้ถูกต้อง (ปกติจะเป็น Classes/PHPExcel.php)
-// ตรวจสอบและโหลด PHPExcel
 $phpexcel_paths = [
     __DIR__ . '/PHPExcel/Classes/PHPExcel.php',
     __DIR__ . '/PHPExcel-1.8.2/Classes/PHPExcel.php',
@@ -34,7 +32,7 @@ if (!$phpexcel_loaded) {
 
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-ini_set('memory_limit', '512M'); // PHP 5.6 กินแรมเยอะเมื่ออ่าน Excel
+ini_set('memory_limit', '512M');
 
 header('Content-Type: application/json; charset=utf-8');
 header("Access-Control-Allow-Origin: *");
@@ -52,7 +50,6 @@ if (!function_exists('random_bytes')) {
         if (function_exists('openssl_random_pseudo_bytes')) {
             return openssl_random_pseudo_bytes($length);
         }
-        // Fallback แบบง่ายๆ ถ้าไม่มี openssl (ไม่แนะนำสำหรับ production จริงจังแต่พอแก้ขัดได้)
         return substr(str_shuffle(str_repeat('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', ceil($length/62))), 1, $length);
     }
 }
@@ -64,7 +61,7 @@ set_error_handler(function($errno, $errstr, $errfile, $errline) {
         'status' => 'error',
         'error' => "PHP Error: $errstr",
         'detail' => "File: $errfile, Line: $errline"
-    ]); // JSON_UNESCAPED_UNICODE มีใน 5.4+ ใช้ได้
+    ], JSON_UNESCAPED_UNICODE);
     exit;
 });
 
@@ -76,7 +73,7 @@ ob_start();
 $GLOBALS['SALARY_TABLE'] = 'salary_data';
 
 if (!file_exists(__DIR__ . '/config.php')) {
-    echo json_encode(['status' => 'error', 'error' => 'ไม่พบไฟล์ config.php']);
+    echo json_encode(['status' => 'error', 'error' => 'ไม่พบไฟล์ config.php'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 require_once __DIR__ . '/config.php';
@@ -85,14 +82,9 @@ require_once __DIR__ . '/config.php';
 // HELPERS
 // -------------------------------
 function json_ok($data = []) {
-    // 1. ล้างข้อมูลทุกอย่างที่เคย echo ออกมาก่อนหน้านี้
-    if (ob_get_length()) ob_clean(); 
-    
-    // 2. ส่งข้อมูล success พร้อมข้อมูล
+    if (ob_get_length()) ob_clean();
     echo json_encode(array_merge(['status' => 'success'], $data), JSON_UNESCAPED_UNICODE);
-    
-    // 3. ปิด Buffer และส่งข้อมูลออกไปทันที
-    ob_end_flush(); 
+    ob_end_flush();
     exit;
 }
 
@@ -100,13 +92,12 @@ function json_err($message, $code = 500, $extra = []) {
     if (ob_get_length()) ob_clean();
     http_response_code($code);
     echo json_encode(array_merge(['status' => 'error', 'error' => $message], $extra), JSON_UNESCAPED_UNICODE);
-    
     ob_end_flush();
     exit;
 }
 
 // -------------------------------
-// MAPPINGS (เหมือนเดิม)
+// MAPPINGS
 // -------------------------------
 $MONTH_MAP = [
     'มกราคม'=>1, 'กุมภาพันธ์'=>2, 'มีนาคม'=>3, 'เมษายน'=>4, 'พฤษภาคม'=>5, 'มิถุนายน'=>6,
@@ -213,7 +204,7 @@ $NUMERIC_FIELDS = [
 ];
 
 // -------------------------------
-// CONNECT DB
+// CONNECT DB (PDO)
 // -------------------------------
 try {
     $dsn = "mysql:host=".DB_HOST.";dbname=".DB_NAME.";charset=utf8mb4";
@@ -226,12 +217,11 @@ try {
 }
 
 // -------------------------------
-// READ INPUT (Fix for PHP 5.6)
+// READ INPUT
 // -------------------------------
 $rawInput = file_get_contents('php://input');
 $payload = json_decode($rawInput, true);
 
-// Fix: เปลี่ยน ?? เป็น isset
 $action = 'info';
 if (isset($_POST['action'])) {
     $action = $_POST['action'];
@@ -242,130 +232,269 @@ if (isset($_POST['action'])) {
 }
 
 // ==================================================================
-// ACTION: LOGIN
+// ACTION: GET SALARY DATA (JOIN emppersonal โดยเทียบ idcard = cid)
 // ==================================================================
-if ($action === 'login') {
+if ($action === 'salary-data') {
     try {
-        $data = $payload ? $payload : $_POST; // Fix shorthand ternary
-        $username = isset($data['username']) ? trim($data['username']) : '';
-        $password = isset($data['password']) ? trim($data['password']) : '';
+        // รับ parameters จาก GET/POST/payload
+        $input = array_merge($_GET, $_POST, $payload ? $payload : []);
+        
+        $cid = isset($input['cid']) ? trim($input['cid']) : '';
+        $name = isset($input['name']) ? trim($input['name']) : '';
+        $month = isset($input['month']) ? intval($input['month']) : 0;
+        $year = isset($input['year']) ? intval($input['year']) : 0;
+        $user_cid = isset($input['user_cid']) ? trim($input['user_cid']) : '';
 
-        if (!$username || !$password) {
-            json_err('กรุณากรอก CID และรหัสผ่าน', 400);
+        // ตาราง
+        $table = $GLOBALS['SALARY_TABLE'];
+        $params = [];
+
+        // ============================================
+        // SQL พร้อม JOIN emppersonal โดยเทียบ cid = idcard
+        // ============================================
+        $sql = "SELECT 
+                    s.*,
+                    e.firstname,
+                    e.lastname,
+                    e.idcard,
+                    CONCAT(e.firstname, ' ', e.lastname) AS emp_fullname
+                FROM {$table} s
+                LEFT JOIN emppersonal e ON s.cid = e.idcard
+                WHERE 1=1";
+
+        // ============================================
+        // ⚠️ SECURITY: กรองตาม USER CID (ลำดับความสำคัญสูงสุด)
+        // ============================================
+        if (!empty($user_cid)) {
+            // ถ้ามี user_cid แสดงว่าเป็น USER ธรรมดา
+            // บังคับให้ดูเฉพาะ CID ของตัวเอง (ไม่สนใจ parameter อื่น)
+            $sql .= " AND s.cid = :user_cid";
+            $params[':user_cid'] = $user_cid;
+            
+            // ลบการค้นหาชื่อและ CID อื่น (ป้องกันการ bypass)
+            $cid = '';
+            $name = '';
+            
+        } else {
+            // ============================================
+            // ADMIN MODE - ค้นหาได้ทั้ง CID และชื่อ
+            // ============================================
+            if (!empty($cid)) {
+                $sql .= " AND s.cid LIKE :cid";
+                $params[':cid'] = "%{$cid}%";
+            }
+            
+            if (!empty($name)) {
+                $sql .= " AND (
+                    e.firstname LIKE :name1 
+                    OR e.lastname LIKE :name2 
+                    OR CONCAT(e.firstname, ' ', e.lastname) LIKE :name3
+                    OR s.name LIKE :name4
+                )";
+                $params[':name1'] = "%{$name}%";
+                $params[':name2'] = "%{$name}%";
+                $params[':name3'] = "%{$name}%";
+                $params[':name4'] = "%{$name}%";
+            }
         }
 
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE cid = :cid LIMIT 1");
-        $stmt->execute([':cid' => $username]);
-        $user = $stmt->fetch();
-
-        if (!$user || !password_verify($password, $user['password'])) {
-            json_err('เลขประจำตัวหรือรหัสผ่านไม่ถูกต้อง', 401);
+        // ============================================
+        // กรองเดือนและปี
+        // ============================================
+        if ($month > 0) {
+            $sql .= " AND s.month = :month";
+            $params[':month'] = $month;
         }
 
-        $token = bin2hex(random_bytes(32));
+        if ($year > 0) {
+            $sql .= " AND s.year = :year";
+            $params[':year'] = $year;
+        }
+
+        $sql .= " ORDER BY s.year DESC, s.month DESC, e.lastname ASC, e.firstname ASC";
+
+        // ============================================
+        // Execute Query
+        // ============================================
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll();
+
+        // ============================================
+        // จัดการข้อมูลก่อนส่งกลับ
+        // ============================================
+        $data = [];
+        foreach ($rows as $row) {
+            // ใช้ชื่อจาก emppersonal ถ้ามี ไม่งั้นใช้จาก salary_data
+            $displayName = !empty($row['emp_fullname']) 
+                ? $row['emp_fullname'] 
+                : $row['name'];
+            
+            // เก็บข้อมูลทั้งหมดจาก salary_data
+            $item = [
+                'id' => $row['id'],
+                'cid' => $row['cid'],
+                'name' => $displayName,  // ← ชื่อที่แสดง (จาก emppersonal)
+                'firstname' => $row['firstname'],  // ← เพิ่มใหม่
+                'lastname' => $row['lastname'],    // ← เพิ่มใหม่
+                'bank_account' => $row['bank_account'],
+                'month' => $row['month'],
+                'year' => $row['year'],
+                'salary' => $row['salary'],
+                'salary_deductions' => $row['salary_deductions'],
+                'total_income' => $row['total_income'],
+                'total_expense' => $row['total_expense'],
+                'net_balance' => $row['net_balance'],
+                'cola_allowance' => $row['cola_allowance'],
+                'retroactive_cola_allowance' => $row['retroactive_cola_allowance'],
+                'retroactive_salary_emp' => $row['retroactive_salary_emp'],
+                'special_public_health_allowance' => $row['special_public_health_allowance'],
+                'position_allowance' => $row['position_allowance'],
+                'monthly_allowance' => $row['monthly_allowance'],
+                'pay_for_performance' => $row['pay_for_performance'],
+                'overtime_pay' => $row['overtime_pay'],
+                'ot_outpatient_dept' => $row['ot_outpatient_dept'],
+                'ot_professional' => $row['ot_professional'],
+                'ot_assistant' => $row['ot_assistant'],
+                'evening_night_shift_pay' => $row['evening_night_shift_pay'],
+                'shift_professional' => $row['shift_professional'],
+                'shift_assistant' => $row['shift_assistant'],
+                'leave_day_deduction' => $row['leave_day_deduction'],
+                'tax_deduction' => $row['tax_deduction'],
+                'retroactive_tax_deduction' => $row['retroactive_tax_deduction'],
+                'gpf_contribution' => $row['gpf_contribution'],
+                'retroactive_gpf_deduction' => $row['retroactive_gpf_deduction'],
+                'gpf_extra_contribution' => $row['gpf_extra_contribution'],
+                'social_security_deduction_gov' => $row['social_security_deduction_gov'],
+                'social_security_deduction_emp' => $row['social_security_deduction_emp'],
+                'phks_provident_fund' => $row['phks_provident_fund'],
+                'funeral_welfare_deduction' => $row['funeral_welfare_deduction'],
+                'coop_deduction_dept' => $row['coop_deduction_dept'],
+                'coop_deduction_phso' => $row['coop_deduction_phso'],
+                'student_loan_deduction_emp' => $row['student_loan_deduction_emp'],
+                'water_bill_deduction' => $row['water_bill_deduction'],
+                'electricity_bill_deduction' => $row['electricity_bill_deduction'],
+                'internet_deduction_emp' => $row['internet_deduction_emp'],
+                'aia_insurance_deduction_emp' => $row['aia_insurance_deduction_emp'],
+                'gsb_loan_deduction_emp' => $row['gsb_loan_deduction_emp'],
+                'gsb_loan_naan' => $row['gsb_loan_naan'],
+                'gsb_loan_loei' => $row['gsb_loan_loei'],
+                'ghb_loan_deduction' => $row['ghb_loan_deduction'],
+                'ktb_loan_deduction_emp' => $row['ktb_loan_deduction_emp'],
+                'hospital_loan_deduction' => $row['hospital_loan_deduction'],
+                'welfare_loan_received' => $row['welfare_loan_received'],
+                'child_education_deduction' => $row['child_education_deduction'],
+                'medical_expense_deduction' => $row['medical_expense_deduction'],
+                'no_private_practice_deduction' => $row['no_private_practice_deduction'],
+                'covid_risk_pay' => $row['covid_risk_pay'],
+                'other_income' => $row['other_income'],
+                'created_at' => $row['created_at']
+            ];
+            
+            $data[] = $item;
+        }
 
         json_ok([
-            'user' => [
-                'id' => $user['id'],
-                'cid' => $user['cid'],
-                'name' => $user['name']
-            ],
-            'token' => $token
+            'data' => $data,
+            'count' => count($data),
+            'filtered_by_user' => !empty($user_cid)
         ]);
 
     } catch (Exception $e) {
-        json_err('Login Error', 500, ['detail' => $e->getMessage()]);
+        json_err('เกิดข้อผิดพลาดในการดึงข้อมูล', 500, ['detail' => $e->getMessage()]);
     }
 }
 
 // ==================================================================
-// ACTION: AVAILABLE FILTERS
+// ACTION: GET AVAILABLE FILTERS (เดือน/ปี)
 // ==================================================================
 if ($action === 'available-filters') {
     try {
         $table = $GLOBALS['SALARY_TABLE'];
-
-        $stmt = $pdo->query("SELECT DISTINCT month, year FROM {$table} WHERE month IS NOT NULL AND year IS NOT NULL ORDER BY year DESC, month DESC");
-        $rows = $stmt->fetchAll();
-
+        
+        // รับ parameter user_cid จาก request
+        $input = array_merge($_GET, $_POST, $payload ? $payload : []);
+        $user_cid = isset($input['user_cid']) ? trim($input['user_cid']) : '';
+        
+        // ============================================
+        // ดึงรายการเดือนที่มีข้อมูลจริงในฐานข้อมูล
+        // ============================================
+        $monthQuery = "SELECT DISTINCT month FROM {$table} WHERE month IS NOT NULL";
+        $monthParams = [];
+        
+        // ถ้าไม่ใช่ Admin ให้กรองตาม user_cid
+        if (!empty($user_cid)) {
+            $monthQuery .= " AND cid = :user_cid";
+            $monthParams[':user_cid'] = $user_cid;
+        }
+        
+        $monthQuery .= " ORDER BY month ASC";
+        
+        $monthStmt = $pdo->prepare($monthQuery);
+        $monthStmt->execute($monthParams);
+        
+        // แปลงเป็น array ของ objects
         $months = [];
-        $years = [];
-
-        foreach ($rows as $r) {
-            $m = $r['month'];
-            if ($m) {
-                $label = isset($NUM_TO_THAI_MONTH[$m]) ? $NUM_TO_THAI_MONTH[$m] : $m; // Fix ??
-                $months[$label] = ['value'=>$label, 'label'=>$label];
+        $thaiMonthNames = [
+            1 => 'มกราคม',
+            2 => 'กุมภาพันธ์',
+            3 => 'มีนาคม',
+            4 => 'เมษายน',
+            5 => 'พฤษภาคม',
+            6 => 'มิถุนายน',
+            7 => 'กรกฎาคม',
+            8 => 'สิงหาคม',
+            9 => 'กันยายน',
+            10 => 'ตุลาคม',
+            11 => 'พฤศจิกายน',
+            12 => 'ธันวาคม'
+        ];
+        
+        while ($row = $monthStmt->fetch()) {
+            $monthNum = intval($row['month']);
+            if ($monthNum >= 1 && $monthNum <= 12) {
+                $months[] = [
+                    'value' => strval($monthNum),
+                    'label' => $thaiMonthNames[$monthNum]
+                ];
             }
-            if ($r['year']) $years[] = $r['year'];
+        }
+        
+        // ============================================
+        // ดึงรายการปีที่มีข้อมูล
+        // ============================================
+        $yearQuery = "SELECT DISTINCT year FROM {$table} WHERE year IS NOT NULL";
+        $yearParams = [];
+        
+        // ถ้าไม่ใช่ Admin ให้กรองตาม user_cid
+        if (!empty($user_cid)) {
+            $yearQuery .= " AND cid = :user_cid";
+            $yearParams[':user_cid'] = $user_cid;
+        }
+        
+        $yearQuery .= " ORDER BY year DESC";
+        
+        $yearStmt = $pdo->prepare($yearQuery);
+        $yearStmt->execute($yearParams);
+        
+        $years = [];
+        while ($row = $yearStmt->fetch()) {
+            $years[] = intval($row['year']);
         }
 
         json_ok([
-            'months' => array_values($months),
-            'years' => array_values(array_unique($years))
+            'months' => $months,
+            'years' => $years,
+            'filtered_by_user' => !empty($user_cid)
         ]);
 
     } catch (Exception $e) {
-        json_err('Filter Error', 500, ['detail' => $e->getMessage()]);
+        json_err('เกิดข้อผิดพลาด', 500, ['detail' => $e->getMessage()]);
     }
 }
 
 // ==================================================================
-// ACTION: GET SALARY DATA
-// ==================================================================
-if ($action === 'salary-data' || $action === 'get_data') {
-    try {
-        // Fix: array_merge ใน 5.6 ต้องระวังถ้า parameter ไม่ใช่ array
-        $p_payload = is_array($payload) ? $payload : [];
-        $params = array_merge($_GET, $_POST, $p_payload);
-        $table = $GLOBALS['SALARY_TABLE'];
-
-        $sql = "SELECT * FROM {$table} WHERE 1=1";
-        $bind = [];
-
-        if (!empty($params['cid'])) {
-            $sql .= " AND cid LIKE :cid";
-            $bind[':cid'] = "%".$params['cid']."%";
-        }
-
-        if (!empty($params['name'])) {
-            $sql .= " AND name LIKE :name";
-            $bind[':name'] = "%".$params['name']."%";
-        }
-
-        if (!empty($params['month'])) {
-            $m = mb_strtolower(trim($params['month']));
-            if (isset($MONTH_MAP[$m])) {
-                $sql .= " AND month = :month";
-                $bind[':month'] = $MONTH_MAP[$m];
-            }
-        }
-
-        if (!empty($params['year'])) {
-            $sql .= " AND year = :year";
-            $bind[':year'] = $params['year'];
-        }
-
-        if (!empty($params['employee'])) {
-            $sql .= " AND employee = :emp";
-            $bind[':emp'] = $params['employee'];
-        }
-
-        $sql .= " ORDER BY employee, id";
-
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($bind);
-        $data = $stmt->fetchAll();
-
-        json_ok(['data' => $data]);
-
-    } catch (Exception $e) {
-        json_err('Get Data Error', 500, ['detail' => $e->getMessage()]);
-    }
-}
-
-// ==================================================================
-// ACTION: UPLOAD EXCEL (Refactored for PHPExcel)
+// ACTION: UPLOAD EXCEL
 // ==================================================================
 if ($action === 'upload') {
     date_default_timezone_set("Asia/Bangkok");
@@ -373,26 +502,27 @@ if ($action === 'upload') {
     try {
         if (!isset($_FILES['file'])) json_err('ไม่พบไฟล์อัปโหลด', 400);
 
-        // Fix ??
         $monthRaw = isset($_POST['month']) ? $_POST['month'] : '';
         $yearRaw  = isset($_POST['year']) ? $_POST['year'] : '';
 
         $mLower = mb_strtolower(trim($monthRaw));
         $monthNumber = isset($MONTH_MAP[$mLower]) ? $MONTH_MAP[$mLower] : null;
-
+        
+        if ($monthNumber) {
+            $monthNumber = (int)$monthNumber;
+        }
+        
         if (!$monthNumber || !$yearRaw) {
             json_err('เดือนหรือปีไม่ถูกต้อง', 400);
         }
+        
+        $yearNumber = (int)$yearRaw;
 
         $file = $_FILES['file'];
         if ($file['error'] !== UPLOAD_ERR_OK) {
             json_err('อัปโหลดไฟล์ไม่สำเร็จ', 400);
         }
 
-        // ==========================================
-        // CHANGE: ใช้ PHPExcel แทน IOFactory ของใหม่
-        // ==========================================
-        // ตรวจสอบว่ามี Class PHPExcel_IOFactory หรือไม่
         if (!class_exists('PHPExcel_IOFactory')) {
              json_err('Server นี้ไม่มี Library PHPExcel (สำหรับ PHP 5.6)', 500);
         }
@@ -406,32 +536,33 @@ if ($action === 'upload') {
         $table = $GLOBALS['SALARY_TABLE'];
         $pdo->beginTransaction();
 
-        $del = $pdo->prepare("DELETE FROM {$table} WHERE month=:m AND year=:y");
-        $del->execute([':m' => $monthNumber, ':y' => $yearRaw]);
+        // ลบข้อมูลเดิม
+        $del = $pdo->prepare("DELETE FROM {$table} WHERE month = :m AND year = :y");
+        $del->execute([':m' => $monthNumber, ':y' => $yearNumber]);
 
         $totalSaved = 0;
         $debugInfo = [];
         $errorLogs = [];
 
-        // วนลูปทุก sheet (PHPExcel style)
+        // วนลูปทุก sheet
         foreach ($excel->getAllSheets() as $sheet) {
             $sheetName = $sheet->getTitle();
             
-            $employeeType = '';
+            $isValidSheet = false;
             if (mb_stripos($sheetName, 'ข้าราชการ') !== false) {
-                $employeeType = 'ข้าราชการ';
+                $isValidSheet = true;
             } elseif (mb_stripos($sheetName, 'ลูกจ้าง') !== false) {
-                $employeeType = 'ลูกจ้างเงินเดือน';
-            } else {
+                $isValidSheet = true;
+            }
+            
+            if (!$isValidSheet) {
                 continue;
             }
 
-            // PHPExcel: toArray
             $rows = $sheet->toArray(null, true, true, true);
             
             if (count($rows) <= 1) continue;
 
-            // header is index 1
             $header = $rows[1];
             $columnMapping = [];
             $headerDebug = [];
@@ -455,8 +586,7 @@ if ($action === 'upload') {
 
                 $data = [
                     'month' => $monthNumber,
-                    'year' => (int)$yearRaw,
-                    'employee' => $employeeType
+                    'year' => $yearNumber
                 ];
 
                 $hasData = false;
@@ -530,7 +660,6 @@ if ($action === 'upload') {
             
             $debugInfo[] = [
                 'sheet' => $sheetName,
-                'employee_type' => $employeeType,
                 'columns_mapped' => count($columnMapping),
                 'total_rows' => count($rows) - 1,
                 'saved' => $sheetSaved,
@@ -542,8 +671,10 @@ if ($action === 'upload') {
         $pdo->commit();
 
         $response = [
-            'message' => "บันทึกสำเร็จ {$totalSaved} รายการ",
+            'message' => "บันทึกสำเร็จ {$totalSaved} รายการ (เดือน {$monthNumber} ปี {$yearNumber})",
             'saved' => $totalSaved,
+            'month' => $monthNumber,
+            'year' => $yearNumber,
             'sheets_processed' => $debugInfo
         ];
         

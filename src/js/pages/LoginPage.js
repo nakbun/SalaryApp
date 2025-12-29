@@ -1,5 +1,12 @@
-// Login Page
+// login.js - Enhanced Login Page with Better Error Handling
+
 window.renderLoginPage = function() {
+    // ✅ เช็ค authentication ก่อนอื่นหมด
+    if (Auth.isAuthenticated()) {
+        router.navigate('/home', true);
+        return;
+    }
+    
     const root = document.getElementById('root');
     root.innerHTML = `
         <div class="login-page">
@@ -12,7 +19,7 @@ window.renderLoginPage = function() {
                         <img src="/SalaryApp/public/img/image-Photoroom (1).png" alt="Hospital Logo" class="logo-login" />
                     </div>
                     <h1 class="brand-title">ระบบสลิปเงินเดือนบุคลากร</h1>
-                    <p class="brand-subtitle">เข้าสู่ระบบเพื่อเริ่มต้นประสบการณ์ที่ยอดเยี่ยม</p>
+                    <p class="brand-subtitle">โรงพยาบาลจิตเวชเลยราชนครินทร์</p>
                     <div class="decorative-line"></div>
                 </div>
             </div>
@@ -24,16 +31,16 @@ window.renderLoginPage = function() {
                     <div id="error-message" class="error-message" style="display: none;"></div>
                     <div class="form-container">
                         <div class="input-group">
-                            <label for="cid" class="label">
+                            <label for="username" class="label">
                                 <span class="label-icon">👤</span>
-                                เลขประจำตัว (CID)
+                                ชื่อผู้ใช้ (Username)
                             </label>
                             <input
                                 type="text"
-                                id="cid"
-                                placeholder="กรอกเลขประจำตัว"
+                                id="username"
+                                placeholder="กรอกชื่อผู้ใช้"
                                 class="input"
-                                maxlength="13"
+                                autocomplete="username"
                             />
                         </div>
                         <div class="input-group">
@@ -47,8 +54,9 @@ window.renderLoginPage = function() {
                                     id="password"
                                     placeholder="กรอกรหัสผ่าน"
                                     class="input password-input"
+                                    autocomplete="current-password"
                                 />
-                                <button type="button" id="toggle-password" class="toggle-button">
+                                <button type="button" id="toggle-password" class="toggle-button" tabindex="-1">
                                     <img
                                         id="eye-icon"
                                         src="/SalaryApp/public/img/closeeye.png"
@@ -62,20 +70,19 @@ window.renderLoginPage = function() {
                             <span class="button-text">เข้าสู่ระบบ</span>
                             <span class="button-arrow">→</span>
                         </button>
+                        <div class="login-footer">
+                            <p class="help-text">หากมีปัญหาในการเข้าสู่ระบบ กรุณาติดต่อห้องคอม</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     `;
     
-    // Check if already authenticated
-    if (Auth.isAuthenticated()) {
-        router.navigate('/home', true);
-        return;
-    }
-    
-    // Event listeners
-    const cidInput = document.getElementById('cid');
+    // ==========================================
+    // Event Listeners Setup
+    // ==========================================
+    const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
     const submitButton = document.getElementById('submit-button');
     const togglePassword = document.getElementById('toggle-password');
@@ -84,6 +91,9 @@ window.renderLoginPage = function() {
     
     let showPassword = false;
     
+    // ==========================================
+    // Toggle Password Visibility
+    // ==========================================
     togglePassword.addEventListener('click', () => {
         showPassword = !showPassword;
         passwordInput.type = showPassword ? 'text' : 'password';
@@ -92,30 +102,83 @@ window.renderLoginPage = function() {
             : '/SalaryApp/public/img/closeeye.png';
     });
     
+    // ==========================================
+    // Handle Form Submission
+    // ==========================================
     const handleSubmit = async () => {
-        const cid = cidInput.value.trim();
+        const username = usernameInput.value.trim();
         const password = passwordInput.value.trim();
         
+        // Hide previous errors
         Utils.hideError(errorMessage);
         
-        if (!cid || !password) {
-            Utils.showError(errorMessage, '⚠️ กรุณากรอก CID และรหัสผ่าน !');
+        // Validation
+        if (!username || !password) {
+            Utils.showError(errorMessage, '⚠️ กรุณากรอกชื่อผู้ใช้และรหัสผ่าน');
             return;
         }
         
+        // Disable submit button and show loading
         submitButton.disabled = true;
         submitButton.innerHTML = `
             <span class="login-spinner"></span>
             <span class="button-text">กำลังเข้าสู่ระบบ...</span>
         `;
         
-        const result = await Auth.login(cid, password);
-        
-        if (result.success) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            router.navigate('/home', true);
-        } else {
-            Utils.showError(errorMessage, `⚠️ ${result.message} !`);
+        try {
+            
+            // Call login API
+            const result = await Auth.login(username, password);
+            
+            if (result.success) {
+                
+                // Show success state
+                submitButton.innerHTML = `
+                    <span class="button-text">✓ เข้าสู่ระบบสำเร็จ</span>
+                `;
+                
+                // Wait a bit before navigating
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                router.navigate('/home', true);
+                
+            } else {
+                console.error('❌ Login failed:', result.message);
+                
+                // Show error message
+                Utils.showError(errorMessage, `⚠️ ${result.message}`);
+                
+                // Reset button
+                submitButton.disabled = false;
+                submitButton.innerHTML = `
+                    <span class="button-text">เข้าสู่ระบบ</span>
+                    <span class="button-arrow">→</span>
+                `;
+                
+                // Focus back to username
+                usernameInput.focus();
+                usernameInput.select();
+            }
+        } catch (error) {
+            console.error('❌ Submit error:', error);
+            
+            // Handle unexpected errors
+            let errorText = 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+            
+            if (error.message) {
+                // แสดง error message ที่เฉพาะเจาะจงกว่า
+                if (error.message.includes('API endpoint')) {
+                    errorText = 'ไม่สามารถเชื่อมต่อกับระบบได้ กรุณาติดต่อผู้ดูแล';
+                } else if (error.message.includes('Network')) {
+                    errorText = 'เกิดปัญหาการเชื่อมต่อเครือข่าย';
+                } else {
+                    errorText = error.message;
+                }
+            }
+            
+            Utils.showError(errorMessage, `⚠️ ${errorText}`);
+            
+            // Reset button
             submitButton.disabled = false;
             submitButton.innerHTML = `
                 <span class="button-text">เข้าสู่ระบบ</span>
@@ -124,12 +187,32 @@ window.renderLoginPage = function() {
         }
     };
     
+    // ==========================================
+    // Event Bindings
+    // ==========================================
+    
+    // Click submit button
     submitButton.addEventListener('click', handleSubmit);
+    
+    // Press Enter on username field
+    usernameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            passwordInput.focus();
+        }
+    });
+    
+    // Press Enter on password field
     passwordInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && !submitButton.disabled) {
+            e.preventDefault();
             handleSubmit();
         }
     });
-}
+    
+    // Auto focus on username field
+    setTimeout(() => {
+        usernameInput.focus();
+    }, 100);
 
-
+};

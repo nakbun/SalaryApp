@@ -1,4 +1,4 @@
-// SalarySlip.js - โค้ดฉบับเต็ม (แก้ไข expensesDisplay)
+// SalarySlip.js - แก้ไขการคำนวณให้ตรงกับฐานข้อมูล
 
 window.SLIP_API_URL = window.SLIP_API_URL || '/SalaryApp/src/API/slip.php';
 window.slipEmployees = window.slipEmployees || [];
@@ -118,12 +118,18 @@ async function loadEmployees() {
 }
 
 function processEmployeeForSlip(emp) {
-    if (emp.incomes && emp.expenses) return emp;
+    if (emp.incomes && emp.expenses) {
+        return emp;
+    }
 
     const monthNum = parseInt(emp.month);
     const monthName = thaiMonths[monthNum - 1];
 
-    // รายรับ - 13 รายการตามภาพสลิปจริง (แสดงในสลิป)
+    const total_income = parseFloat(emp.total_income || 0);
+    const total_expense = parseFloat(emp.total_expense || 0);
+    const net_balance = parseFloat(emp.net_balance || 0);
+
+    // รายรับ - 13 รายการ
     const incomes = [
         { label: 'เงินเดือน', value: parseFloat(emp.salary || 0) },
         { label: 'เงินเดือน (ตกเบิก)', value: parseFloat(emp.retroactive_salary_emp || 0) },
@@ -140,7 +146,7 @@ function processEmployeeForSlip(emp) {
         { label: 'เงินช่วยเหลือค่าเล่าเรียนบุตร', value: parseFloat(emp.child_education_deduction || 0) }
     ];
 
-    // รายจ่าย - 10 รายการตามภาพสลิปจริงเท่านั้น (แสดงในสลิป)
+    // รายจ่าย - 10 รายการ
     const expenses = [
         { label: 'ภาษี', value: parseFloat(emp.tax_deduction || 0) },
         { label: 'ภาษี (ตกเบิก)', value: parseFloat(emp.retroactive_tax_deduction || 0) },
@@ -154,45 +160,20 @@ function processEmployeeForSlip(emp) {
         { label: 'ค่าไฟฟ้า', value: parseFloat(emp.electricity_bill_deduction || 0) }
     ];
 
-    // รายจ่ายเพิ่มเติมที่ไม่แสดงในสลิป (สำหรับคำนวณเท่านั้น)
-    const hiddenExpenses = [
-        parseFloat(emp.internet_deduction_emp || 0),
-        parseFloat(emp.social_security_deduction_emp || 0),
-        parseFloat(emp.social_security_deduction_gov || 0),
-        parseFloat(emp.phks_provident_fund || 0),
-        parseFloat(emp.funeral_welfare_deduction || 0),
-        parseFloat(emp.student_loan_deduction_emp || 0),
-        parseFloat(emp.aia_insurance_deduction_emp || 0),
-        parseFloat(emp.gsb_loan_deduction_emp || 0),
-        parseFloat(emp.gsb_loan_naan || 0),
-        parseFloat(emp.gsb_loan_loei || 0),
-        parseFloat(emp.ghb_loan_deduction || 0),
-        parseFloat(emp.ktb_loan_deduction_emp || 0),
-        parseFloat(emp.hospital_loan_deduction || 0),
-        parseFloat(emp.hospital_loan_employment || 0),
-        parseFloat(emp.leave_day_deduction || 0)
-    ];
-
-    const total_income = incomes.reduce((sum, item) => sum + item.value, 0);
-    const total_expense_display = expenses.reduce((sum, item) => sum + item.value, 0);
-    const total_hidden = hiddenExpenses.reduce((sum, val) => sum + val, 0);
-    const total_expense = total_expense_display + total_hidden;
-    const net_balance = total_income - total_expense;
-
     return {
         ...emp,
         monthName,
         incomes,
-        expenses, // ใช้เฉพาะ 10 รายการสำหรับแสดงผล
+        expenses,
         total_income,
         total_expense,
         net_balance,
-        // ข้อมูลค่าไฟฟ้า (รอดึงจากฐานข้อมูล)
+        // ข้อมูลค่าไฟฟ้า
         elec_prev_reading: emp.elec_prev_reading || 0,
         elec_current_reading: emp.elec_current_reading || 0,
         elec_total_units: emp.elec_total_units || 0,
         elec_excess_units: emp.elec_excess_units || 0,
-        // ข้อมูลค่าน้ำประปา (รอดึงจากฐานข้อมูล)
+        // ข้อมูลค่าน้ำประปา
         water_prev_reading: emp.water_prev_reading || 0,
         water_current_reading: emp.water_current_reading || 0,
         water_total_units: emp.water_total_units || 0,
@@ -245,17 +226,16 @@ function createSlipCard(employee, index, showExpandButton) {
     const year = employee.year || params.get('year') || (new Date().getFullYear() + 543);
     const monthName = employee.monthName || thaiMonths[parseInt(month) - 1];
 
-    // กำหนดจำนวนแถวเป็น 13 (ตามจำนวนรายรับ)
     const maxRows = 13;
 
     let rows = '';
     for (let i = 0; i < maxRows; i++) {
         const income = employee.incomes[i];
-        const expense = employee.expenses[i]; // แสดงเฉพาะ 10 รายการแรก
+        const expense = employee.expenses[i];
 
         let noteText = '';
         if (i === 0) {
-            noteText = ''; // บรรทัดแรกว่าง
+            noteText = '';
         } else if (i === 1) {
             noteText = `<div class="note-title-row"><strong>ค่าไฟฟ้า ค่าน้ำประปา ประจำเดือน ${monthName} ${year}</strong></div>`;
         } else if (i === 2) {
@@ -417,7 +397,6 @@ function goToPageSlip(page) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Export functions for global use
 window.openSlipModal = openSlipModal;
 window.closeSlipModal = closeSlipModal;
 window.goToPageSlip = goToPageSlip;
