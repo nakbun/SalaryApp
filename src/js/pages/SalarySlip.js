@@ -1,9 +1,10 @@
-// SalarySlip.js - แก้ไขการคำนวณให้ตรงกับฐานข้อมูล
+// SalarySlip.js - WITH DYNAMIC SIGNATURE SUPPORT
 
-window.SLIP_API_URL = window.SLIP_API_URL || '/SalaryApp/src/API/slip.php';
+window.SLIP_API_URL = window.SLIP_API_URL || '/SalaryApp/src/API/index.php';
 window.slipEmployees = window.slipEmployees || [];
 window.slipCurrentPage = window.slipCurrentPage || 1;
 window.slipItemsPerPage = 6;
+window.signerData = null;
 
 window.thaiMonths = [
     'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -17,8 +18,25 @@ function formatCurrency(amount) {
     }).format(amount || 0);
 }
 
-window.renderSalarySlip = async function () {
+async function fetchSignatureData() {
+    try {
+        const response = await fetch(`${window.SLIP_API_URL}?action=get-signature`);
+        const result = await response.json();
+        
+        if (result.status === 'success' && result.signer) {
+            window.signerData = result.signer;
+            console.log('✅ Signature data loaded:', window.signerData);
+        } else {
+            console.warn('⚠️ No signature data found');
+            window.signerData = null;
+        }
+    } catch (error) {
+        console.error('❌ Error fetching signature:', error);
+        window.signerData = null;
+    }
+}
 
+window.renderSalarySlip = async function () {
     const app = document.getElementById('root');
     if (!app) return;
 
@@ -74,6 +92,7 @@ window.renderSalarySlip = async function () {
         if (e.target.id === 'slip-modal-overlay') closeSlipModal();
     });
 
+    await fetchSignatureData();
     await loadEmployees();
 
     window.addEventListener('resize', () => {
@@ -100,12 +119,13 @@ async function loadEmployees() {
         const month = params.get('month') || (new Date().getMonth() + 1);
         const year = params.get('year') || (new Date().getFullYear() + 543);
 
-        const response = await fetch(`${window.SLIP_API_URL}?action=get_employees&month=${month}&year=${year}`);
+        const apiUrl = `${window.SLIP_API_URL}?action=salary-data&month=${month}&year=${year}`;
+
+        const response = await fetch(apiUrl);
         const result = await response.json();
 
-        if (result.success && result.data?.length > 0) {
+        if (result.status === 'success' && result.data?.length > 0) {
             window.slipEmployees = result.data.map(processEmployeeForSlip);
-
             renderSlipContent();
             renderPrintPages();
         } else {
@@ -118,10 +138,6 @@ async function loadEmployees() {
 }
 
 function processEmployeeForSlip(emp) {
-    if (emp.incomes && emp.expenses) {
-        return emp;
-    }
-
     const monthNum = parseInt(emp.month);
     const monthName = thaiMonths[monthNum - 1];
 
@@ -129,35 +145,50 @@ function processEmployeeForSlip(emp) {
     const total_expense = parseFloat(emp.total_expense || 0);
     const net_balance = parseFloat(emp.net_balance || 0);
 
-    // รายรับ - 13 รายการ
+    const elec_prev = parseFloat(emp.elec_prev_reading || 0);
+    const elec_current = parseFloat(emp.elec_current_reading || 0);
+    const elec_total = parseFloat(emp.elec_total_units || 0);
+    const elec_excess = parseFloat(emp.elec_excess_units || 0);
+
+    const water_prev = parseFloat(emp.water_prev_reading || 0);
+    const water_current = parseFloat(emp.water_current_reading || 0);
+    const water_total = parseFloat(emp.water_total_units || 0);
+    const water_excess = parseFloat(emp.water_excess_units || 0);
+
     const incomes = [
         { label: 'เงินเดือน', value: parseFloat(emp.salary || 0) },
         { label: 'เงินเดือน (ตกเบิก)', value: parseFloat(emp.retroactive_salary_emp || 0) },
-        { label: 'เงินประจำตำแหน่ง', value: parseFloat(emp.position_allowance || 0) },
-        { label: 'เงินประจำตำแหน่ง (ตกเบิก)', value: parseFloat(emp.retroactive_position_allowance || 0) },
+        { label: 'เงินเดือนสุทธิ', value: parseFloat(emp.salary_deductions || 0) },
+        { label: 'เงินประจำตำแหน่ง', value: parseFloat(emp.ot_professional || 0) },
         { label: 'ค่าตอบแทน พตส.', value: parseFloat(emp.special_public_health_allowance || 0) },
-        { label: 'ค่าตอบแทนไม่ปฏิบัติเวชส่วนตัว', value: parseFloat(emp.no_private_practice_deduction || 0) },
-        { label: 'ค่าตอบแทน P4P', value: parseFloat(emp.pay_for_performance || 0) },
-        { label: 'ค่าตอบแทน P4P (ตกเบิก)', value: parseFloat(emp.retroactive_p4p || 0) },
-        { label: 'เงินพิเศษเดิศ Covid-19', value: parseFloat(emp.covid_risk_pay || 0) },
-        { label: 'ค่าตอบแทนเสี่ยงภัย Covid-19', value: parseFloat(emp.covid_exposure || 0) },
-        { label: 'ค่าตอบแทนการปฏิบัติงาน (OT)', value: parseFloat(emp.overtime_pay || 0) },
+        { label: 'ค่าตอบแทนไม่ปฏิบัติเวชส่วนตัว', value: parseFloat(emp.cola_allowance || 0) },
+        { label: 'ค่าตอบแทนการปฏิบัติงาน (โอที)', value: parseFloat(emp.ot_outpatient_dept || 0) },
         { label: 'ค่าตอบแทนการปฏิบัติงาน (บ่าย-ดึก)', value: parseFloat(emp.evening_night_shift_pay || 0) },
-        { label: 'เงินช่วยเหลือค่าเล่าเรียนบุตร', value: parseFloat(emp.child_education_deduction || 0) }
+        { label: 'ค่าตอบแทน P4P', value: parseFloat(emp.pay_for_performance || 0) },
+        { label: 'เงินช่วยเหลือค่าเล่าเรียนบุตร', value: parseFloat(emp.ot_assistant || 0) },
+        { label: 'ค่าตอบแทนรายเดือน', value: parseFloat(emp.leave_day_deduction || 0) },
+        { label: 'เงินกู้สวัสดิการ รพ.', value: parseFloat(emp.welfare_loan_received || 0) },
+        { label: 'อื่นๆ', value: parseFloat(emp.other_income || 0) }
     ];
 
-    // รายจ่าย - 10 รายการ
     const expenses = [
         { label: 'ภาษี', value: parseFloat(emp.tax_deduction || 0) },
-        { label: 'ภาษี (ตกเบิก)', value: parseFloat(emp.retroactive_tax_deduction || 0) },
-        { label: 'กบข.', value: parseFloat(emp.gpf_contribution || 0) },
-        { label: 'กบข.(ตกเบิก)', value: parseFloat(emp.retroactive_gpf_deduction || 0) },
+        { label: 'กบข./ประกันสังคม', value: parseFloat(emp.social_security_deduction_emp || 0) },
         { label: 'กบข.สะสมส่วนเพิ่ม', value: parseFloat(emp.gpf_extra_contribution || 0) },
         { label: 'สอ.กรมสุขภาพจิต', value: parseFloat(emp.coop_deduction_dept || 0) },
         { label: 'สอ.สาธารณสุขเลย', value: parseFloat(emp.coop_deduction_phso || 0) },
-        { label: 'ผผส.กระทรวง', value: parseFloat(emp.moph_savings_deduction || 0) },
+        { label: 'ฌกส.กระทรวง', value: parseFloat(emp.funeral_welfare_deduction || 0) },
+        { label: 'กองทุน พกส.', value: parseFloat(emp.phks_provident_fund || 0) },
+        { label: 'ธนาคารออมสิน', value: parseFloat(emp.gsb_loan_naan || 0) },
+        { label: 'ธนาคารกรุงไทย', value: parseFloat(emp.ktb_loan_deduction_emp || 0) },
+        { label: 'ธนาคารอาคารสงเคราะห์', value: parseFloat(emp.gsb_loan_loei || 0) },
         { label: 'ค่าน้ำประปา', value: parseFloat(emp.water_bill_deduction || 0) },
-        { label: 'ค่าไฟฟ้า', value: parseFloat(emp.electricity_bill_deduction || 0) }
+        { label: 'ค่าไฟฟ้า', value: parseFloat(emp.electricity_bill_deduction || 0) },
+        { label: 'ค่าอินเตอร์เน็ต', value: parseFloat(emp.internet_deduction_emp || 0) },
+        { label: 'ค่าประกัน AIA', value: parseFloat(emp.aia_insurance_deduction_emp || 0) },
+        { label: 'กยศ.', value: parseFloat(emp.student_loan_deduction_emp || 0) },
+        { label: 'เงินกู้ รพ/ประกันงาน', value: parseFloat(emp.student_loan_deduction_emp || 0) },
+        { label: 'อื่นๆ', value: parseFloat(emp.shift_assistant || 0) }
     ];
 
     return {
@@ -168,16 +199,14 @@ function processEmployeeForSlip(emp) {
         total_income,
         total_expense,
         net_balance,
-        // ข้อมูลค่าไฟฟ้า
-        elec_prev_reading: emp.elec_prev_reading || 0,
-        elec_current_reading: emp.elec_current_reading || 0,
-        elec_total_units: emp.elec_total_units || 0,
-        elec_excess_units: emp.elec_excess_units || 0,
-        // ข้อมูลค่าน้ำประปา
-        water_prev_reading: emp.water_prev_reading || 0,
-        water_current_reading: emp.water_current_reading || 0,
-        water_total_units: emp.water_total_units || 0,
-        water_excess_units: emp.water_excess_units || 0
+        elec_prev_reading: elec_prev,
+        elec_current_reading: elec_current,
+        elec_total_units: elec_total,
+        elec_excess_units: elec_excess,
+        water_prev_reading: water_prev,
+        water_current_reading: water_current,
+        water_total_units: water_total,
+        water_excess_units: water_excess
     };
 }
 
@@ -204,20 +233,52 @@ function renderPrintPages() {
     const printAllPages = document.getElementById('print-all-pages');
     if (!printAllPages) return;
 
-    const ITEMS_PER_PAGE_PRINT = 2;
-    const totalPrintPages = Math.ceil(window.slipEmployees.length / ITEMS_PER_PAGE_PRINT);
+    const pages = window.slipEmployees.map((emp, idx) => {
+        return `<div class="print-page">${createSlipCard(emp, idx, false)}</div>`;
+    }).join('');
+    
+    printAllPages.innerHTML = pages;
+}
 
-    printAllPages.innerHTML = Array.from({ length: totalPrintPages }, (_, pageIndex) => {
-        const start = pageIndex * ITEMS_PER_PAGE_PRINT;
-        const end = Math.min(start + ITEMS_PER_PAGE_PRINT, window.slipEmployees.length);
-        const pageEmployees = window.slipEmployees.slice(start, end);
-
+function createSignatureHTML() {
+    // กรณีไม่มีข้อมูล หรือดึงข้อมูลไม่ได้
+    if (!window.signerData || !window.signerData.signature) {
         return `
-            <div class="print-page">
-                ${pageEmployees.map((emp, idx) => createSlipCard(emp, start + idx, false)).join('')}
+            <div class="signature-wrapper">
+                <div class="signature-section">
+                    <div class="signature-left">
+                        <div class="sig-line">
+                            <span class="sig-label">ลงชื่อ</span>
+                            <span class="sig-dots">................................................</span>
+                            <span class="sig-role-inline">(ผู้มีหน้าที่จ่ายเงิน)</span>
+                        </div>
+                        <p class="sig-name-center">(.......................................................)</p>
+                        <p class="sig-position-center">(.......................................................)</p>
+                    </div>
+                </div>
             </div>
         `;
-    }).join('');
+    }
+
+    // แสดงผลตามข้อมูลที่ดึงมาจาก Query
+    return `
+        <div class="signature-wrapper">
+            <div class="signature-section">
+                <div class="signature-left">
+                    <div class="sig-line">
+                        <span class="sig-label">ลงชื่อ</span>
+                        <img src="${window.signerData.signature}" 
+                             alt="ลายเซ็น" 
+                             class="signature-image-inline"
+                             onerror="this.style.visibility='hidden';">
+                        <span class="sig-role-inline">(ผู้มีหน้าที่จ่ายเงิน)</span>
+                    </div>
+                    <p class="sig-name-center">(${window.signerData.fullname})</p>
+                    <p class="sig-position-center">${window.signerData.posname}</p>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function createSlipCard(employee, index, showExpandButton) {
@@ -226,43 +287,12 @@ function createSlipCard(employee, index, showExpandButton) {
     const year = employee.year || params.get('year') || (new Date().getFullYear() + 543);
     const monthName = employee.monthName || thaiMonths[parseInt(month) - 1];
 
-    const maxRows = 13;
+    const maxRows = 17;
 
     let rows = '';
     for (let i = 0; i < maxRows; i++) {
         const income = employee.incomes[i];
         const expense = employee.expenses[i];
-
-        let noteText = '';
-        if (i === 0) {
-            noteText = '';
-        } else if (i === 1) {
-            noteText = `<div class="note-title-row"><strong>ค่าไฟฟ้า ค่าน้ำประปา ประจำเดือน ${monthName} ${year}</strong></div>`;
-        } else if (i === 2) {
-            noteText = `<div class="note-header-row">
-                <span class="note-label"><strong></strong></span>
-                <span class="note-col"><strong>จดครั้งก่อน</strong></span>
-                <span class="note-col"><strong>จดครั้งนี้</strong></span>
-                <span class="note-col"><strong>รวมหน่วย</strong></span>
-                <span class="note-col"><strong>ส่วนเกิน</strong></span>
-            </div>`;
-        } else if (i === 3) {
-            noteText = `<div class="note-data-row">
-                <span class="note-label"><strong>ค่าน้ำ</strong></span>
-                <span class="note-col">${employee.water_prev_reading || 0}</span>
-                <span class="note-col">${employee.water_current_reading || 0}</span>
-                <span class="note-col">${employee.water_total_units || 0}</span>
-                <span class="note-col">${employee.water_excess_units || 0}</span>
-            </div>`;
-        } else if (i === 4) {
-            noteText = `<div class="note-data-row">
-                <span class="note-label"><strong>ค่าไฟ</strong></span>
-                <span class="note-col">${employee.elec_prev_reading || 0}</span>
-                <span class="note-col">${employee.elec_current_reading || 0}</span>
-                <span class="note-col">${employee.elec_total_units || 0}</span>
-                <span class="note-col">${employee.elec_excess_units || 0}</span>
-            </div>`;
-        }
 
         rows += `
             <tr>
@@ -272,7 +302,6 @@ function createSlipCard(employee, index, showExpandButton) {
                 <td class="seq">${expense ? (i + 1) : ''}</td>
                 <td class="label">${expense ? expense.label : ''}</td>
                 <td class="amount">${expense && expense.value > 0 ? formatCurrency(expense.value) : '-'}</td>
-                <td class="notes-cell">${noteText}</td>
             </tr>
         `;
     }
@@ -289,7 +318,7 @@ function createSlipCard(employee, index, showExpandButton) {
                     <h3>โรงพยาบาลจิตเวชเลยราชนครินทร์</h3>
                     <p>รายการจ่ายเงินเดือน ประจำเดือน ${monthName} ${year}</p>
                     <p><strong>ชื่อ:</strong> ${employee.name || '-'}</p>
-                    <p><strong>ตำแหน่ง:</strong> ${employee.station || '-'}</p>
+                    <p><strong>ตำแหน่ง:</strong> ${employee.posname || '-'}</p>
                 </div>
                 <div class="header-info">
                     <p>440 หมู่ 4 ตำบลนาอาน</p>
@@ -298,22 +327,19 @@ function createSlipCard(employee, index, showExpandButton) {
             </div>
 
             <table class="slip-table">
-
                 <colgroup>
-                    <col style="width:6%">
-                    <col style="width:20%">
-                    <col style="width:10%">
-                    <col style="width:6%">
-                    <col style="width:20%">
-                    <col style="width:10%">
-                    <col style="width:28%">
+                    <col style="width:8%">
+                    <col style="width:38%">
+                    <col style="width:15%">
+                    <col style="width:8%">
+                    <col style="width:38%">
+                    <col style="width:15%">
                 </colgroup>
 
                 <thead>
                     <tr class="main-header">
                         <th colspan="3">รายรับ</th>
                         <th colspan="3">รายจ่าย</th>
-                        <th rowspan="2" class="notes-header">หมายเหตุ</th>
                     </tr>
                     <tr class="sub-header">
                         <th>ลำดับ</th>
@@ -333,7 +359,6 @@ function createSlipCard(employee, index, showExpandButton) {
                         <td><strong>${formatCurrency(employee.total_income)}</strong></td>
                         <td colspan="2"><strong>รวมจ่าย</strong></td>
                         <td><strong>${formatCurrency(employee.total_expense)}</strong></td>
-                        <td rowspan="2" class="notes-footer"></td>
                     </tr>
                     <tr class="net-row">
                         <td colspan="3"></td>
@@ -342,6 +367,45 @@ function createSlipCard(employee, index, showExpandButton) {
                     </tr>
                 </tfoot>
             </table>
+
+            <div class="bottom-section">
+                <div class="notes-box">
+                    <div class="notes-title"><strong>ค่าไฟฟ้า ค่าน้ำประปา ประจำเดือน ${monthName} ${year}</strong></div>
+                    <table class="notes-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>จดครั้งก่อน</th>
+                                <th>จดครั้งนี้</th>
+                                <th>รวมหน่วย</th>
+                                <th>ส่วนเกิน</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>ค่าน้ำ</strong></td>
+                                <td>${employee.water_prev_reading || '0'}</td>
+                                <td>${employee.water_current_reading || '0'}</td>
+                                <td>${employee.water_total_units || '0'}</td>
+                                <td>${employee.water_excess_units || '0'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ค่าไฟ</strong></td>
+                                <td>${employee.elec_prev_reading || '0'}</td>
+                                <td>${employee.elec_current_reading || '0'}</td>
+                                <td>${employee.elec_total_units || '0'}</td>
+                                <td>${employee.elec_excess_units || '0'}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="rights-info">
+                        <p>สิทธิในการใช้น้ำประปา: <strong>${employee.right_w || '0'}</strong> หน่วย</p>
+                        <p>สิทธิในการใช้ไฟฟ้า: <strong>${employee.right_e || '0'}</strong> หน่วย</p>
+                    </div>
+                </div>
+                
+                ${createSignatureHTML()}
+            </div>
         </div>
     `;
 }

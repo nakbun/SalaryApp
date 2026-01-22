@@ -44,10 +44,12 @@ $GLOBALS['MONTH_NAMES'] = array(
 // Column mappings
 // ==========================
 $GLOBALS['COLUMN_MAP'] = array(
+    // ===== ข้อมูลบุคคล =====
     'cid' => 'cid',
     'เลขบัตรประชาชน' => 'cid',
     'เลขประจำตัวประชาชน' => 'cid',
     'รหัสบัตรประชาชน' => 'cid',
+
     'ชื่อ' => 'name',
     'ชื่อ-สกุล' => 'name',
     'ชื่อ-นามสกุล' => 'name',
@@ -56,16 +58,14 @@ $GLOBALS['COLUMN_MAP'] = array(
     'เลขที่บัญชี' => 'bank_account',
     'บัญชีธนาคาร' => 'bank_account',
 
-    'เดือน' => 'month',
-    'ปี' => 'year',
-    'ปี พ.ศ.' => 'year',
-
+    // ===== รายรับ =====
     'เงินเดือน' => 'salary',
     'เงินเดือนสุทธิ' => 'salary_deductions',
     'รวมรับ' => 'total_income',
 
     'ค่าครองชีพ' => 'cola_allowance',
     'ค่าครองชีพ(ตกเบิก)' => 'retroactive_cola_allowance',
+
     'ง/ด(ตกเบิก)' => 'retroactive_salary_emp',
     'ง/ด ตกเบิก' => 'retroactive_salary_emp',
 
@@ -76,7 +76,6 @@ $GLOBALS['COLUMN_MAP'] = array(
 
     'โควิด-19' => 'covid_risk_pay',
     'เพิ่มโควิด-19' => 'covid_risk_pay',
-    'เสี่ยงภัยโควิด' => 'covid_exposure',
 
     'เงินกู้สวัสดิการ' => 'welfare_loan_received',
     'โอที' => 'overtime_pay',
@@ -90,9 +89,8 @@ $GLOBALS['COLUMN_MAP'] = array(
     'บ-ด/ผช.' => 'shift_assistant',
 
     'อื่นๆ' => 'other_income',
-    'รวมจ่าย' => 'total_expense',
-    'คงเหลือ' => 'net_balance',
 
+    // ===== รายจ่าย =====
     'หักวันลา' => 'leave_day_deduction',
     'ภาษี' => 'tax_deduction',
     'ภาษี ตกเบิก' => 'retroactive_tax_deduction',
@@ -108,7 +106,6 @@ $GLOBALS['COLUMN_MAP'] = array(
     'ฌกส.' => 'funeral_welfare_deduction',
     'สอ.กรม' => 'coop_deduction_dept',
     'สอ.สสจ.เลย' => 'coop_deduction_phso',
-    'สสจ.' => 'prov_health_office',
 
     'กยศ.' => 'student_loan_deduction_emp',
     'กยศ' => 'student_loan_deduction_emp',
@@ -136,26 +133,71 @@ $GLOBALS['COLUMN_MAP'] = array(
     'การศึกษาบุตร' => 'child_education_deduction',
     'ค่ารักษาพยาบาล' => 'medical_expense_deduction',
     'ไม่ปฏิบัติเวช' => 'no_private_practice_deduction',
+
+    // ===== สรุป =====
+    'รวมจ่าย' => 'total_expense',
+    'คงเหลือ' => 'net_balance',
 );
+
 
 // ==========================
 // Numeric Columns
 // ==========================
 $GLOBALS['NUMERIC_COLUMNS'] = array(
-    'salary', 'salary_deductions', 'total_income', 'cola_allowance',
-    'retroactive_cola_allowance', 'retroactive_salary_emp', 'special_public_health_allowance',
-    'position_allowance', 'monthly_allowance', 'pay_for_performance', 'covid_risk_pay',
-    'covid_exposure', 'welfare_loan_received', 'overtime_pay', 'evening_night_shift_pay',
-    'ot_outpatient_dept', 'ot_professional', 'ot_assistant', 'shift_professional',
-    'shift_assistant', 'other_income', 'total_expense', 'net_balance', 'leave_day_deduction',
-    'tax_deduction', 'retroactive_tax_deduction', 'gpf_contribution', 'retroactive_gpf_deduction',
-    'gpf_extra_contribution', 'social_security_deduction_gov', 'social_security_deduction_emp',
-    'phks_provident_fund', 'funeral_welfare_deduction', 'coop_deduction_dept',
-    'coop_deduction_phso', 'prov_health_office', 'student_loan_deduction_emp',
-    'water_bill_deduction', 'electricity_bill_deduction', 'internet_deduction_emp',
-    'aia_insurance_deduction_emp', 'gsb_loan_deduction_emp', 'gsb_loan_naan', 'gsb_loan_loei',
-    'ghb_loan_deduction', 'ktb_loan_deduction_emp', 'hospital_loan_deduction',
-    'hospital_loan_employment', 'child_education_deduction', 'medical_expense_deduction',
-    'no_private_practice_deduction'
+    // ===== รายรับ =====
+    'salary',
+    'salary_deductions',
+    'total_income',
+    'cola_allowance',
+    'retroactive_cola_allowance',
+    'retroactive_salary_emp',
+    'special_public_health_allowance',
+    'position_allowance',
+    'monthly_allowance',
+    'pay_for_performance',
+    'covid_risk_pay',
+    'welfare_loan_received',
+    'overtime_pay',
+    'evening_night_shift_pay',
+    'ot_outpatient_dept',
+    'ot_professional',
+    'ot_assistant',
+    'shift_professional',
+    'shift_assistant',
+    'other_income',
+
+    // ===== รายจ่าย =====
+    'leave_day_deduction',
+    'tax_deduction',
+    'retroactive_tax_deduction',
+    'gpf_contribution',
+    'retroactive_gpf_deduction',
+    'gpf_extra_contribution',
+    'social_security_deduction_gov',
+    'social_security_deduction_emp',
+    'phks_provident_fund',
+    'funeral_welfare_deduction',
+    'coop_deduction_dept',
+    'coop_deduction_phso',
+    'student_loan_deduction_emp',
+    'water_bill_deduction',
+    'electricity_bill_deduction',
+    'internet_deduction_emp',
+    'aia_insurance_deduction_emp',
+    'gsb_loan_deduction_emp',
+    'gsb_loan_naan',
+    'gsb_loan_loei',
+    'ghb_loan_deduction',
+    'ktb_loan_deduction_emp',
+    'hospital_loan_deduction',
+    'hospital_loan_employment',
+    'child_education_deduction',
+    'medical_expense_deduction',
+    'no_private_practice_deduction',
+
+    // ===== สรุป =====
+    'total_expense',
+    'net_balance',
 );
+
 ?>

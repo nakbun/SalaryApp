@@ -188,6 +188,7 @@ window.renderAddSalary = function () {
     }
 }
 
+// ⭐ แก้ไขฟังก์ชันนี้
 async function handleUpload() {
     if (!file || !selectedMonth || !selectedYear) {
         alert('กรุณาเลือกไฟล์ เดือน และปีก่อนอัปโหลด!');
@@ -215,14 +216,19 @@ async function handleUpload() {
         formData.append('month', selectedMonth);
         formData.append('year', selectedYear);
 
-        // ✅ แก้ตรงนี้ - ส่ง 'upload' เป็น action
+        console.log('📤 Uploading file:', file.name);
+        console.log('📅 Month:', selectedMonth, 'Year:', selectedYear);
+
+        // ⭐ ใช้ API.upload() แทน fetch ตรงๆ
         const data = await API.upload('upload', formData);
+
+        console.log('✅ Response from API:', data);
 
         if (data.status === 'success') {
             showAddSalaryModal(true, {
-                totalRows: data.rows,
-                savedRows: data.saved || data.rows,
-                message: `บันทึกข้อมูลเดือน ${selectedMonth} ${selectedYear} เรียบร้อย`
+                totalRows: data.saved || 0,
+                savedRows: data.saved || 0,
+                message: data.message || `บันทึกข้อมูลเดือน ${selectedMonth} ${selectedYear} เรียบร้อย`
             });
             setTimeout(() => {
                 router.navigate('/home', true);
@@ -233,9 +239,22 @@ async function handleUpload() {
             });
         }
     } catch (err) {
-        console.error('Upload error details:', err);
+        console.error('❌ Upload error details:', err);
+        
+        let errorMessage = 'เกิดข้อผิดพลาดในการอัปโหลด';
+        
+        if (err.message.includes('Failed to fetch') || err.message.includes('ERR_NAME_NOT_RESOLVED')) {
+            errorMessage = 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้\n\nกรุณาตรวจสอบ:\n• เซิร์ฟเวอร์กำลังทำงานอยู่หรือไม่\n• URL ของ API ถูกต้องหรือไม่';
+        } else if (err.message.includes('HTML')) {
+            errorMessage = 'เซิร์ฟเวอร์ส่งข้อมูลผิดพลาด\n\nกรุณาตรวจสอบว่า PHP กำลังทำงานอยู่';
+        } else if (err.detail) {
+            errorMessage = err.message + '\n\nรายละเอียด: ' + err.detail;
+        } else {
+            errorMessage = err.message;
+        }
+        
         showAddSalaryModal(false, {
-            message: err.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์'
+            message: errorMessage
         });
     } finally {
         loading = false;
@@ -291,7 +310,7 @@ function showAddSalaryModal(success, data) {
                     </div>
                     <div class="modal-info-text">
                         <p class="modal-info-title error">ไม่สามารถบันทึกข้อมูลได้</p>
-                        <p class="modal-info-detail error">${data.message}</p>
+                        <p class="modal-info-detail error" style="white-space: pre-line;">${data.message}</p>
                     </div>
                 </div>
             </div>
@@ -314,9 +333,11 @@ window.closeAddSalaryModal = function () {
         document.getElementById('file-input').value = '';
         document.getElementById('month-select').value = '';
         document.getElementById('year-select').value = '';
+        document.getElementById('month-indicator').style.display = 'none';
+        document.getElementById('year-indicator').style.display = 'none';
+        document.getElementById('file-indicator').style.display = 'none';
         file = null;
         selectedMonth = '';
         selectedYear = '';
     }
 };
-

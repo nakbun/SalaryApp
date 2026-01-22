@@ -1,197 +1,128 @@
-// auth.js - Enhanced Authentication Manager
+// auth.js - Enhanced Authentication Manager with Signer Support
 
 const Auth = {
     // ==========================================
-    // LOGIN
+    // LOGIN WITH CID CARD (เข้าสู่ระบบด้วยบัตรประชาชน)
+    // ==========================================
+    async loginWithCID(cidcard) {
+        try {
+            const API_BASE_PATH = "/SalaryApp/src/API";
+            const endpoint = `${API_BASE_PATH}/auth.php?cidcard=${encodeURIComponent(cidcard)}`;
+            
+            const response = await fetch(endpoint, {
+                method: "GET",
+                headers: { "Accept": "application/json" },
+                credentials: 'include'
+            });
+
+            const text = await response.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error('❌ JSON parse error:', e);
+                return { success: false, message: 'เกิดข้อผิดพลาดในการตรวจสอบ CID Card' };
+            }
+
+            if (data.success && data.token && data.user) {
+                // บันทึก session ผู้ใช้งาน
+                sessionStorage.setItem('token', data.token);
+                sessionStorage.setItem('user', JSON.stringify(data.user));
+                sessionStorage.setItem('login_method', 'cidcard');
+
+                // ⭐ บันทึกข้อมูลลายเซ็นผู้มีอำนาจ (จาก Query SUSER depid 15)
+                if (data.signer) {
+                    sessionStorage.setItem('signerData', JSON.stringify(data.signer));
+                }
+                
+                return {
+                    success: true,
+                    message: 'เข้าสู่ระบบด้วย CID Card สำเร็จ',
+                    user: data.user
+                };
+            } else {
+                return { success: false, message: data.message || 'ไม่พบข้อมูล CID Card ในระบบ' };
+            }
+        } catch (error) {
+            console.error('❌ CID Login error:', error);
+            return { success: false, message: 'เกิดข้อผิดพลาดในการเข้าสู่ระบบด้วย CID Card' };
+        }
+    },
+
+    // ==========================================
+    // LOGIN (เข้าสู่ระบบด้วย Username/Password)
     // ==========================================
     async login(username, password) {
         try {
-            
             const response = await API.post('login', {
                 username: username,
                 password: password
             });
 
             if (response.success && response.token && response.user) {
-                // บันทึก session
                 sessionStorage.setItem('token', response.token);
                 sessionStorage.setItem('user', JSON.stringify(response.user));
+                sessionStorage.setItem('login_method', 'username_password');
+
+                // ⭐ บันทึกข้อมูลลายเซ็นผู้มีอำนาจที่ได้จาก Query SUSER
+                if (response.signer) {
+                    sessionStorage.setItem('signerData', JSON.stringify(response.signer));
+                }
                 
-                return {
-                    success: true,
-                    message: 'เข้าสู่ระบบสำเร็จ',
-                    user: response.user
-                };
+                return { success: true, message: 'เข้าสู่ระบบสำเร็จ', user: response.user };
             } else {
-                return {
-                    success: false,
-                    message: response.message || 'เข้าสู่ระบบไม่สำเร็จ'
-                };
+                return { success: false, message: response.message || 'เข้าสู่ระบบไม่สำเร็จ' };
             }
         } catch (error) {
             console.error('❌ Login error:', error);
-            
-            // แยก error message ตามประเภท
-            let errorMessage = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
-            
-            if (error.message.includes('API endpoint returned HTML')) {
-                errorMessage = 'ไม่สามารถเชื่อมต่อกับ API ได้ กรุณาตรวจสอบการตั้งค่า';
-            } else if (error.message.includes('Network')) {
-                errorMessage = 'เกิดปัญหาการเชื่อมต่อเครือข่าย';
-            } else {
-                errorMessage = error.message || errorMessage;
-            }
-            
-            return {
-                success: false,
-                message: errorMessage
-            };
+            return { success: false, message: error.message || 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ' };
         }
     },
 
     // ==========================================
-    // GET CURRENT USER
+    // GET CURRENT USER / CHECK AUTH
     // ==========================================
     getCurrentUser() {
         try {
             const userStr = sessionStorage.getItem('user');
             const token = sessionStorage.getItem('token');
-            
-            if (!userStr || !token) {
-                return null;
-            }
-            
-            const user = JSON.parse(userStr);
-            
-            // ตรวจสอบว่า user object มีข้อมูลครบถ้วน
-            if (!user.id || !user.username) {
-                console.error('❌ Invalid user object:', user);
-                return null;
-            }
-            
-            return user;
-        } catch (error) {
-            console.error('❌ Error getting current user:', error);
-            return null;
-        }
+            if (!userStr || !token) return null;
+            return JSON.parse(userStr);
+        } catch (error) { return null; }
     },
 
-    // ==========================================
-    // CHECK AUTHENTICATION
-    // ==========================================
     isAuthenticated() {
         const user = this.getCurrentUser();
         const token = sessionStorage.getItem('token');
-        
-        const isAuth = !!(user && token);
-        
-        return isAuth;
+        return !!(user && token);
     },
 
     // ==========================================
-    // REFRESH USER INFO
-    // ==========================================
-    async refreshUserInfo() {
-        try {
-            
-            const response = await API.get('get-user-info');
-            
-            if (response.success && response.user) {
-                sessionStorage.setItem('user', JSON.stringify(response.user));
-                return response.user;
-            } else {
-                console.error('❌ Failed to refresh user info:', response.message);
-                return null;
-            }
-        } catch (error) {
-            console.error('❌ Error refreshing user info:', error);         
-            return null;
-        }
-    },
-
-    // ==========================================
-    // LOGOUT
+    // LOGOUT (ออกจากระบบ)
     // ==========================================
     async logout() {
         try {
+            try { await API.post('logout'); } catch (e) {}
             
-            // เรียก API logout (optional - ไม่ต้อง await ก็ได้)
-            try {
-                await API.post('logout');
-            } catch (e) {
-                console.warn('⚠️ Logout API failed, continuing with local logout');
-            }
-            
-            // ลบ session
+            // ล้างข้อมูลทั้งหมดรวมถึงลายเซ็น
             sessionStorage.removeItem('token');
             sessionStorage.removeItem('user');
+            sessionStorage.removeItem('signerData'); 
+            sessionStorage.removeItem('login_method');
             sessionStorage.clear();
             
-            // Redirect to login
             if (typeof router !== 'undefined') {
                 router.navigate('/', true);
             } else {
                 window.location.href = '/';
             }
         } catch (error) {
-            console.error('❌ Logout error:', error);
-            // Force logout anyway
             sessionStorage.clear();
             window.location.href = '/';
         }
-    },
-
-    // ==========================================
-    // CHECK ADMIN PRIVILEGES
-    // ==========================================
-    hasAdminPrivileges(user = null) {
-        if (!user) {
-            user = this.getCurrentUser();
-        }
-        
-        if (!user) {
-            return false;
-        }
-
-        // 1. ตรวจสอบ status = 'ADMIN'
-        const status = String(user.status || '').toUpperCase();
-        if (status === 'ADMIN') {
-            return true;
-        }
-
-        // 2. ตรวจสอบตำแหน่ง = 'นักวิชาการเงินและบัญชี'
-        const posname = String(user.posname || '');
-        if (posname.includes('นักวิชาการเงินและบัญชี')) {
-            return true;
-        }
-
-        return false;
-    },
-
-    // ==========================================
-    // GET USER ROLE DISPLAY
-    // ==========================================
-    getUserRoleDisplay(user = null) {
-        if (!user) {
-            user = this.getCurrentUser();
-        }
-        
-        if (!user) {
-            return 'GUEST';
-        }
-
-        const isAdmin = this.hasAdminPrivileges(user);
-        const actualStatus = user.status || 'USER';
-        
-        if (isAdmin && actualStatus !== 'ADMIN') {
-            return 'ADMIN (จากตำแหน่ง)';
-        }
-        
-        return actualStatus;
     }
 };
 
-// Export for use in modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = Auth;
 }

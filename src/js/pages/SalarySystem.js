@@ -6,6 +6,36 @@ let availableMonths = [];
 let availableYears = [];
 const itemsPerPage = 20;
 
+async function fetchEmployeesWithUtilities(filters = {}) {
+    try {
+        const user = Auth.getCurrentUser();
+        const isAdmin = hasAdminPrivileges(user);
+        const userCID = user.cid || user.idcard || user.ref_l_id;
+
+        const cleanFilters = { ...filters };
+
+        if (!isAdmin) {
+            delete cleanFilters.cid;
+            delete cleanFilters.name;
+            cleanFilters.user_cid = userCID;
+        } else {
+            delete cleanFilters.user_cid;
+        }
+
+        const data = await API.get('salary-data', cleanFilters);
+
+        if (data.status === 'success' && data.data) {
+            return data.data;
+        } else {
+            console.error('❌ Failed to fetch employees:', data);
+            return [];
+        }
+    } catch (error) {
+        console.error('❌ Error fetching employees:', error);
+        return [];
+    }
+}
+
 // ==========================================
 // HELPER: ตรวจสอบสิทธิ์แบบ Admin
 // ==========================================
@@ -285,34 +315,63 @@ function setupEventListeners(isAdmin) {
         runSearch();
     });
 
-    safeOn('print-all-btn', 'click', () => {
+    safeOn('print-all-btn', 'click', async () => {
         if (!results.length) return alert('ไม่มีข้อมูล');
-        sessionStorage.setItem('printEmployees', JSON.stringify(results));
-        router.navigate('/salaryslip');
+
+        // ดึงเดือน/ปีจาก filter ปัจจุบัน
+        const monthSelect = document.getElementById('search-month');
+        const yearSelect = document.getElementById('search-year');
+
+        const filters = {};
+        if (monthSelect?.value) filters.month = monthSelect.value;
+        if (yearSelect?.value) filters.year = yearSelect.value;
+
+        // ถ้าเป็น Admin และมีการกรอก CID หรือชื่อ ให้เพิ่มเข้าไป
+        if (isAdmin) {
+            const cidInput = document.getElementById('search-cid');
+            const nameInput = document.getElementById('search-name');
+            if (cidInput?.value) filters.cid = cidInput.value;
+            if (nameInput?.value) filters.name = nameInput.value;
+        }
+
+        // ⭐ ดึงข้อมูลใหม่พร้อมค่าน้ำ-ไฟ
+        const fullData = await fetchEmployeesWithUtilities(filters);
+
+        if (fullData.length > 0) {
+            sessionStorage.setItem('printEmployees', JSON.stringify(fullData));
+            router.navigate('/salaryslip');
+        } else {
+            alert('ไม่สามารถดึงข้อมูลได้');
+        }
     });
+
 }
 
+// ==========================================
+// แก้ไข fetchAvailableFilters()
+// ==========================================
 async function fetchAvailableFilters() {
     try {
         const user = Auth.getCurrentUser();
         const isAdmin = hasAdminPrivileges(user);
-        
+
         // สร้าง filters สำหรับดึงข้อมูลที่มีอยู่จริง
         const filterParams = {};
-        
-        // ถ้าไม่ใช่ Admin ให้กรองตาม CID ของ user
+
+        // ⭐ แก้ไขตรงนี้: ถ้าไม่ใช่ Admin ให้กรองตาม CID ของ user
         if (!isAdmin) {
             const userCID = user.cid || user.idcard || user.ref_l_id;
             if (userCID) {
                 filterParams.user_cid = userCID;
             }
         }
-        
+        // ⭐ ถ้าเป็น Admin ไม่ส่ง user_cid ไปเลย
+
         const data = await API.get('available-filters', filterParams);
         if (data.status === 'success') {
             const mSel = document.getElementById('search-month');
             const ySel = document.getElementById('search-year');
-            
+
             // เคลียร์ options เดิม (เหลือแต่ตัวเลือก "ทุกเดือน" และ "ทุกปี")
             if (mSel) {
                 mSel.innerHTML = '<option value="">ทุกเดือน</option>';
@@ -323,7 +382,7 @@ async function fetchAvailableFilters() {
                     mSel.appendChild(o);
                 });
             }
-            
+
             if (ySel) {
                 ySel.innerHTML = '<option value="">ทุกปี</option>';
                 (data.years || []).forEach(y => {
@@ -334,9 +393,14 @@ async function fetchAvailableFilters() {
                 });
             }
         }
-    } catch (e) { }
+    } catch (e) {
+        console.error('Error fetching filters:', e);
+    }
 }
 
+// ==========================================
+// แก้ไข fetchSalaryData()
+// ==========================================
 async function fetchSalaryData(filters = {}) {
     const loader = document.getElementById('loading-container');
     const errBox = document.getElementById('error-container');
@@ -351,33 +415,35 @@ async function fetchSalaryData(filters = {}) {
     try {
         const user = Auth.getCurrentUser();
         const isAdmin = hasAdminPrivileges(user);
-
-        // ลองหา CID จากหลายฟิลด์ที่เป็นไปได้
         const userCID = user.cid || user.idcard || user.ref_l_id;
 
+        // ⭐ สร้าง filters object ใหม่เพื่อไม่ให้มี user_cid ติดมา
+        const cleanFilters = { ...filters };
+
         if (!isAdmin) {
+            // USER MODE
             if (!userCID) {
-                throw new Error('ไม่พบเลขประจำตัวประชาชน (cid/idcard/ref_l_id)\nกรุณาติดต่อผู้ดูแลระบบ');
+                throw new Error('ไม่พบเลขประจำตัวประชาชน\nกรุณาติดต่อผู้ดูแลระบบ');
             }
 
-            // ลบ parameter ที่ไม่ควรมี
-            delete filters.cid;
-            delete filters.name;
+            // ลบ cid, name ออก
+            delete cleanFilters.cid;
+            delete cleanFilters.name;
 
-            // ส่ง user_cid ไปยัง Backend
-            filters.user_cid = userCID;
+            // เพิ่ม user_cid
+            cleanFilters.user_cid = userCID;
+
         } else {
-            delete filters.user_cid;
+            // ADMIN MODE - ต้องลบ user_cid ออกอย่างชัดเจน
+            delete cleanFilters.user_cid;
         }
 
-        const data = await API.get('salary-data', filters);
+        const data = await API.get('salary-data', cleanFilters);
 
         if (data.status === 'success') {
             results = data.data || [];
-
-            // Double check ฝั่ง Frontend (Security Layer 2)
+            // Double check (เฉพาะ USER)
             if (!isAdmin && userCID) {
-                const before = results.length;
                 results = results.filter(row => row.cid === userCID);
             }
 
@@ -386,6 +452,7 @@ async function fetchSalaryData(filters = {}) {
             throw new Error(data.message || data.error || 'เกิดข้อผิดพลาด');
         }
     } catch (err) {
+        console.error('❌ Error:', err);
         if (errBox) {
             errBox.style.display = 'block';
             errBox.innerHTML = `<span>⚠️</span> ${err.message}`;
@@ -519,9 +586,24 @@ window.goToPage = function (p) {
     if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
 };
 
-window.printEmployee = function (index) {
-    if (results[index]) {
-        sessionStorage.setItem('printEmployees', JSON.stringify([results[index]]));
+window.printEmployee = async function (index) {
+    if (!results[index]) return;
+
+    const employee = results[index];
+
+    // ดึงข้อมูลใหม่พร้อมค่าน้ำ-ไฟ
+    const filters = {
+        cid: employee.cid,
+        month: employee.month,
+        year: employee.year
+    };
+
+    const fullData = await fetchEmployeesWithUtilities(filters);
+
+    if (fullData.length > 0) {
+        sessionStorage.setItem('printEmployees', JSON.stringify(fullData));
         router.navigate('/salaryslip');
+    } else {
+        alert('ไม่สามารถดึงข้อมูลได้');
     }
-};  
+};

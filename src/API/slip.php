@@ -58,7 +58,22 @@ function getEmployees() {
     $year = isset($_GET['year']) ? intval($_GET['year']) : (intval(date('Y')) + 543);
     
     try {
-        $sql = "SELECT * FROM salary_data WHERE month = :month AND year = :year ORDER BY name ASC";
+        $sql = "
+            SELECT 
+                sd.*,
+                p.posname
+            FROM salary_data sd
+            INNER JOIN emppersonal e ON e.idcard = sd.cid
+            LEFT JOIN work_history h 
+                ON h.empno = e.empno 
+                AND (h.dateEnd_w = '0000-00-00' OR h.dateEnd_w IS NULL)
+            LEFT JOIN posid p 
+                ON p.posid = COALESCE(h.posid, e.posid)  -- เพิ่มบรรทัดนี้
+            WHERE sd.month = :month 
+            AND sd.year = :year
+            ORDER BY sd.name ASC
+        ";
+
         $stmt = $conn->prepare($sql);
         $stmt->execute(array(':month' => $month, ':year' => $year));
         
@@ -90,7 +105,20 @@ function getEmployee() {
     }
     
     try {
-        $sql = "SELECT * FROM salary_data WHERE id = :id";
+        $sql = "
+            SELECT 
+                sd.*,
+                p.posname
+            FROM salary_data sd
+            INNER JOIN emppersonal e ON e.idcard = sd.cid
+            LEFT JOIN work_history h 
+                ON h.empno = e.empno 
+                AND (h.dateEnd_w = '0000-00-00' OR h.dateEnd_w IS NULL)
+            LEFT JOIN posid p 
+                ON p.posid = COALESCE(h.posid, e.posid)
+            WHERE sd.id = :id
+            ";
+
         $stmt = $conn->prepare($sql);
         $stmt->execute(array(':id' => $id));
         
@@ -185,6 +213,7 @@ function processEmployeeData($row) {
         'id' => $row['id'],
         'cid' => $row['cid'],
         'name' => $row['name'],
+        'posname' => $row['posname'],
         'employee_type' => isset($row['employee_type']) ? $row['employee_type'] : 'ข้าราชการ',
         'bank_account' => isset($row['bank_account']) ? $row['bank_account'] : '-',
         'month' => $row['month'],
