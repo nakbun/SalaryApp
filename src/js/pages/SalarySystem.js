@@ -58,6 +58,47 @@ function hasAdminPrivileges(user) {
 
     return false;
 }
+
+// ==========================================
+// Helper Function: Show Logout Overlay
+// ==========================================
+function showLogoutOverlay() {
+    // ลบ overlay เก่าถ้ามี
+    const existingOverlay = document.getElementById('logout-overlay');
+    if (existingOverlay) {
+        existingOverlay.remove();
+    }
+
+    // สร้าง overlay ใหม่
+    const overlay = document.createElement('div');
+    overlay.id = 'logout-overlay';
+    overlay.className = 'logout-overlay';
+
+    overlay.innerHTML = `
+        <div class="logout-spinner"></div>
+        <p class="logout-text">กำลังออกจากระบบ...</p>
+    `;
+
+    // เพิ่ม inline CSS - พื้นหลังโปร่งใส
+    overlay.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: rgba(255, 255, 255, 0.3) !important;
+        backdrop-filter: blur(8px) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 20px !important;
+        z-index: 99999 !important;
+    `;
+
+    document.body.appendChild(overlay);
+}
+
 // ==========================================
 // 1. MAIN RENDER FUNCTION
 // ==========================================
@@ -263,7 +304,32 @@ function setupEventListeners(isAdmin) {
         safeOn('dashboard-btn', 'click', () => router.navigate('/dashboard'));
     }
 
-    safeOn('logout-btn', 'click', () => Auth.logout());
+    // ⭐ แก้ไขตรงนี้ - เพิ่ม overlay ตอนออกระบบ
+    safeOn('logout-btn', 'click', async () => {
+        showLogoutOverlay();
+        
+        // รอ 500ms ให้ overlay แสดงก่อน
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        try {
+            // ลองใช้ Auth.logout() ก่อน (ถ้ามี)
+            if (typeof Auth !== 'undefined' && Auth.logout) {
+                Auth.logout();
+            }
+        } catch (error) {
+            console.log('Auth.logout() failed, using manual logout');
+        }
+        
+        // Fallback: Force logout manually
+        sessionStorage.clear();
+        localStorage.clear();
+        
+        // รอ 300ms แล้ว redirect
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Force redirect ไปหน้า login
+        window.location.href = '/SalaryApp/';
+    });
 
     const pBtn = document.getElementById('profile-button');
     const pDrop = document.getElementById('profile-dropdown');
@@ -442,6 +508,21 @@ async function fetchSalaryData(filters = {}) {
 
         if (data.status === 'success') {
             results = data.data || [];
+            
+            // ⭐ กรองข้อมูลซ้ำออก (ใช้ cid + month + year เป็น unique key)
+            const uniqueResults = [];
+            const seen = new Set();
+            
+            results.forEach(row => {
+                const key = `${row.cid}-${row.month}-${row.year}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    uniqueResults.push(row);
+                }
+            });
+            
+            results = uniqueResults;
+            
             // Double check (เฉพาะ USER)
             if (!isAdmin && userCID) {
                 results = results.filter(row => row.cid === userCID);

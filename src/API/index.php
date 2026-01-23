@@ -40,6 +40,8 @@ header("Access-Control-Allow-Origin: *");
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 
+date_default_timezone_set("Asia/Bangkok");
+
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit;
@@ -142,6 +144,10 @@ $COLUMN_MAP = [
     // ⭐ เพิ่มใหม่
     'อื่นๆ (จ่าย)' => 'shift_assistant',
     'อื่นๆ (รับ)' => 'other_income',
+    'อื่นๆ จ่าย' => 'shift_assistant',
+    'อื่นๆ รับ' => 'other_income',
+    'อื่นๆจ่าย' => 'shift_assistant',
+    'อื่นๆรับ' => 'other_income',
     
     'ค่าตอบแทน P4P' => 'pay_for_performance',
     
@@ -645,7 +651,6 @@ if ($action === 'available-filters') {
 // ACTION: UPLOAD EXCEL
 // ==================================================================
 if ($action === 'upload') {
-    date_default_timezone_set("Asia/Bangkok");
 
     try {
         if (!isset($_FILES['file'])) json_err('ไม่พบไฟล์อัปโหลด', 400);

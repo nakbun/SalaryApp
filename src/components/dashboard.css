@@ -283,8 +283,8 @@
 }
 
 .card-icon {
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   border-radius: 14px;
   display: flex;
   align-items: center;
@@ -327,54 +327,16 @@
   box-shadow: var(--shadow-lg);
 }
 
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid var(--border-light);
-}
-
 .chart-card h3 {
   font-size: 18px;
   font-weight: 700;
   color: var(--text-dark);
-  margin: 0;
+  margin: 0 0 20px 0;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border-light);
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.chart-toggle {
-  display: flex;
-  gap: 6px;
-  background: var(--bg-light);
-  padding: 4px;
-  border-radius: 8px;
-}
-
-.toggle-btn {
-  padding: 6px 14px;
-  border: none;
-  background: transparent;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-gray);
-  transition: var(--transition);
-}
-
-.toggle-btn.active {
-  background: var(--primary-blue);
-  color: white;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-}
-
-.toggle-btn:hover:not(.active) {
-  background: rgba(59, 130, 246, 0.1);
-  color: var(--primary-blue);
 }
 
 /* ============================================

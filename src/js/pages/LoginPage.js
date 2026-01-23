@@ -146,7 +146,7 @@ window.renderLoginPage = function () {
                 `;
 
                 showLoginRedirectOverlay();
-                await new Promise(resolve => setTimeout(resolve, 800));
+                await new Promise(resolve => setTimeout(resolve, 400));
                 router.navigate('/home', true);
 
             } else {
@@ -212,28 +212,60 @@ window.renderLoginPage = function () {
 };
 
 // ==========================================
-// Helper: CID Login Handler (ใหม่)
+// Helper: CID Login Handler
 // ==========================================
 async function handleCIDLogin(cidcard) {
-
     const root = document.getElementById('root');
+
+    // สร้าง overlay แบบใหม่ - พื้นหลังโปร่งใส
     root.innerHTML = `
-        <div class="login-page">
-            <div class="login-redirect-overlay" style="display: flex;">
-                <div class="login-redirect-spinner"></div>
-                <p class="login-redirect-text">กำลังตรวจสอบ CID Card...</p>
-                <p style="margin-top: 10px; font-size: 14px; opacity: 0.7;">
-                    CID: ${cidcard.substring(0, 8)}...
-                </p>
-            </div>
+        <div class="login-redirect-overlay" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            z-index: 9999;
+        ">
+            <div class="login-redirect-spinner" style="
+                width: 60px;
+                height: 60px;
+                border: 6px solid #f3f3f3;
+                border-top: 6px solid #3b82f6;
+                border-radius: 50%;
+                animation: redirectSpinnerRotate 1s linear infinite;
+            "></div>
+            <p class="login-redirect-text" style="
+                font-size: 20px;
+                color: #374151;
+                font-weight: 600;
+            ">กำลังตรวจสอบ CID Card...</p>
+            <p style="
+                margin-top: 10px;
+                font-size: 14px;
+                color: #6b7280;
+            ">CID: ${cidcard.substring(0, 8)}...</p>
         </div>
+        
+        <style>
+            @keyframes redirectSpinnerRotate {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
     `;
 
     try {
         const result = await Auth.loginWithCID(cidcard);
 
         if (result.success) {
-
             const textElement = document.querySelector('.login-redirect-text');
             if (textElement) {
                 textElement.textContent = '✓ เข้าสู่ระบบสำเร็จ';
@@ -319,31 +351,39 @@ async function handleCIDLogin(cidcard) {
 // Helper Function: Show Login Redirect Overlay
 // ==========================================
 function showLoginRedirectOverlay() {
-    const overlay = document.getElementById('login-redirect-overlay');
+    let overlay = document.getElementById('login-redirect-overlay');
+
     if (overlay) {
+        // ถ้ามี overlay อยู่แล้ว แค่แสดงมัน
         overlay.style.display = 'flex';
     } else {
-        const newOverlay = document.createElement('div');
-        newOverlay.id = 'login-redirect-overlay';
-        newOverlay.className = 'login-redirect-overlay';
-        newOverlay.innerHTML = `
+        // ถ้ายังไม่มี สร้างใหม่
+        overlay = document.createElement('div');
+        overlay.id = 'login-redirect-overlay';
+        overlay.className = 'login-redirect-overlay';
+
+        overlay.innerHTML = `
             <div class="login-redirect-spinner"></div>
             <p class="login-redirect-text">กำลังเข้าสู่ระบบ...</p>
         `;
-        newOverlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.3);
-            backdrop-filter: blur(5px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
+
+        // เพิ่ม inline CSS - พื้นหลังโปร่งใส
+        overlay.style.cssText = `
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: rgba(255, 255, 255, 0.3) !important;
+            backdrop-filter: blur(8px) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 20px !important;
+            z-index: 9999 !important;
         `;
-        document.body.appendChild(newOverlay);
+
+        document.body.appendChild(overlay);
     }
 }

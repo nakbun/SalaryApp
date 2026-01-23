@@ -180,10 +180,7 @@ const PayrollDashboard = {
             year: recordY,
             totalIncome: 0,
             otOPD: 0,
-            otProfessional: 0,
-            otAssistant: 0,
-            shiftProfessional: 0,
-            shiftAssistant: 0,
+            shiftPay: 0,
             p4p: 0,
             count: 0
           });
@@ -194,12 +191,11 @@ const PayrollDashboard = {
         // รายได้รวม = เงินเดือนหลักเท่านั้น (ไม่รวมค่าหัก)
         data.totalIncome += parseFloat(record.salary || 0);
 
+        // ⭐ ดึงเฉพาะ ot_outpatient_dept
         data.otOPD += parseFloat(record.ot_outpatient_dept || 0);
-        data.otProfessional += parseFloat(record.ot_professional || 0);
-        data.otAssistant += parseFloat(record.ot_assistant || 0);
 
-        data.shiftProfessional += parseFloat(record.shift_professional || 0);
-        data.shiftAssistant += parseFloat(record.shift_assistant || 0);
+        // ⭐ ดึงเฉพาะ evening_night_shift_pay
+        data.shiftPay += parseFloat(record.evening_night_shift_pay || 0);
 
         data.p4p += parseFloat(record.pay_for_performance || 0);
 
@@ -216,10 +212,7 @@ const PayrollDashboard = {
               label: `ปี ${data.year}`,
               totalIncome: Math.round(data.totalIncome / data.count),
               otOPD: Math.round(data.otOPD / data.count),
-              otProfessional: Math.round(data.otProfessional / data.count),
-              otAssistant: Math.round(data.otAssistant / data.count),
-              shiftProfessional: Math.round(data.shiftProfessional / data.count),
-              shiftAssistant: Math.round(data.shiftAssistant / data.count),
+              shiftPay: Math.round(data.shiftPay / data.count),
               p4p: Math.round(data.p4p / data.count),
               count: data.count
             }
@@ -228,10 +221,7 @@ const PayrollDashboard = {
               label: `ปี ${data.year}`,
               totalIncome: 0,
               otOPD: 0,
-              otProfessional: 0,
-              otAssistant: 0,
-              shiftProfessional: 0,
-              shiftAssistant: 0,
+              shiftPay: 0,
               p4p: 0,
               count: 0
             };
@@ -270,10 +260,7 @@ const PayrollDashboard = {
             monthNum: recordM,
             totalIncome: 0,
             otOPD: 0,
-            otProfessional: 0,
-            otAssistant: 0,
-            shiftProfessional: 0,
-            shiftAssistant: 0,
+            shiftPay: 0,
             p4p: 0,
             count: 0
           });
@@ -284,12 +271,11 @@ const PayrollDashboard = {
         // รายได้รวม = เงินเดือนหลักเท่านั้น (ไม่รวมค่าหัก)
         data.totalIncome += parseFloat(record.salary || 0);
 
+        // ⭐ ดึงเฉพาะ ot_outpatient_dept
         data.otOPD += parseFloat(record.ot_outpatient_dept || 0);
-        data.otProfessional += parseFloat(record.ot_professional || 0);
-        data.otAssistant += parseFloat(record.ot_assistant || 0);
 
-        data.shiftProfessional += parseFloat(record.shift_professional || 0);
-        data.shiftAssistant += parseFloat(record.shift_assistant || 0);
+        // ⭐ ดึงเฉพาะ evening_night_shift_pay
+        data.shiftPay += parseFloat(record.evening_night_shift_pay || 0);
 
         data.p4p += parseFloat(record.pay_for_performance || 0);
 
@@ -310,10 +296,7 @@ const PayrollDashboard = {
               label: `${data.month} ${data.year}`,
               totalIncome: Math.round(data.totalIncome / data.count),
               otOPD: Math.round(data.otOPD / data.count),
-              otProfessional: Math.round(data.otProfessional / data.count),
-              otAssistant: Math.round(data.otAssistant / data.count),
-              shiftProfessional: Math.round(data.shiftProfessional / data.count),
-              shiftAssistant: Math.round(data.shiftAssistant / data.count),
+              shiftPay: Math.round(data.shiftPay / data.count),
               p4p: Math.round(data.p4p / data.count),
               count: data.count
             }
@@ -324,10 +307,7 @@ const PayrollDashboard = {
               label: `${data.month} ${data.year}`,
               totalIncome: 0,
               otOPD: 0,
-              otProfessional: 0,
-              otAssistant: 0,
-              shiftProfessional: 0,
-              shiftAssistant: 0,
+              shiftPay: 0,
               p4p: 0,
               count: 0
             };
@@ -380,26 +360,14 @@ const PayrollDashboard = {
               <div class="chart-legend" id="incomeLegend"></div>
             </div>
             <div class="chart-card">
-              <div class="chart-header">
-                <h3>⏰ แนวโน้มค่าล่วงเวลา (OT)</h3>
-                <div class="chart-toggle">
-                  <button class="toggle-btn active" data-chart="ot" data-mode="combined">รวม</button>
-                  <button class="toggle-btn" data-chart="ot" data-mode="separated">แยก</button>
-                </div>
-              </div>
+              <h3>⏰ แนวโน้มค่าล่วงเวลา (OT)</h3>
               <div class="chart-container">
                 <canvas id="otChart"></canvas>
               </div>
               <div class="chart-legend" id="otLegend"></div>
             </div>
             <div class="chart-card">
-              <div class="chart-header">
-                <h3>🌙 แนวโน้มค่าเวร</h3>
-                <div class="chart-toggle">
-                  <button class="toggle-btn active" data-chart="shift" data-mode="combined">รวม</button>
-                  <button class="toggle-btn" data-chart="shift" data-mode="separated">แยก</button>
-                </div>
-              </div>
+              <h3>🌙 แนวโน้มค่าเวร</h3>
               <div class="chart-container">
                 <canvas id="shiftChart"></canvas>
               </div>
@@ -431,17 +399,13 @@ const PayrollDashboard = {
 
       if (!yearly[y]) {
         yearly[y] = {
-          year: y, totalIncome: 0, otOPD: 0, otProfessional: 0, otAssistant: 0,
-          shiftProfessional: 0, shiftAssistant: 0, p4p: 0
+          year: y, totalIncome: 0, otOPD: 0, shiftPay: 0, p4p: 0
         };
       }
 
       yearly[y].totalIncome += parseFloat(r.salary || 0);
       yearly[y].otOPD += parseFloat(r.ot_outpatient_dept || 0);
-      yearly[y].otProfessional += parseFloat(r.ot_professional || 0);
-      yearly[y].otAssistant += parseFloat(r.ot_assistant || 0);
-      yearly[y].shiftProfessional += parseFloat(r.shift_professional || 0);
-      yearly[y].shiftAssistant += parseFloat(r.shift_assistant || 0);
+      yearly[y].shiftPay += parseFloat(r.evening_night_shift_pay || 0);
       yearly[y].p4p += parseFloat(r.pay_for_performance || 0);
     });
 
@@ -499,10 +463,12 @@ const PayrollDashboard = {
       totalRecords++;
       totalIncome += parseFloat(record.salary || 0);
       totalP4P += parseFloat(record.pay_for_performance || 0);
-      totalOT += parseFloat(record.ot_outpatient_dept || 0) +
-        parseFloat(record.ot_professional || 0) + parseFloat(record.ot_assistant || 0);
-      totalShift += parseFloat(record.shift_professional || 0) +
-        parseFloat(record.shift_assistant || 0);
+      
+      // ⭐ ดึงเฉพาะ ot_outpatient_dept
+      totalOT += parseFloat(record.ot_outpatient_dept || 0);
+      
+      // ⭐ ดึงเฉพาะ evening_night_shift_pay
+      totalShift += parseFloat(record.evening_night_shift_pay || 0);
     });
 
     const periodLabel = (this.state.filterMode === 'yearRange' && this.state.startYear === 'all' && this.state.endYear === 'all')
@@ -552,7 +518,7 @@ const PayrollDashboard = {
         <div class="stat-card">
           <div class="card-content">
             <div>
-              <p class="card-title">ค่า OT รวม ${periodLabel}</p>
+              <p class="card-title">ค่า OT ${periodLabel}</p>
               <h3 class="card-value">฿${totalOT.toLocaleString()}</h3>
               <p style="font-size:0.75rem;color:#64748b;margin-top:4px;">เฉลี่ย ฿${Math.round(avgOT).toLocaleString()}/เดือน</p>
             </div>
@@ -562,7 +528,7 @@ const PayrollDashboard = {
         <div class="stat-card">
           <div class="card-content">
             <div>
-              <p class="card-title">ค่าเวรรวม ${periodLabel}</p>
+              <p class="card-title">ค่าเวร ${periodLabel}</p>
               <h3 class="card-value">฿${totalShift.toLocaleString()}</h3>
               <p style="font-size:0.75rem;color:#64748b;margin-top:4px;">เฉลี่ย ฿${Math.round(avgShift).toLocaleString()}/เดือน</p>
             </div>
@@ -649,9 +615,9 @@ const PayrollDashboard = {
       incomeCtx.style.height = '100%';
       
       const totalIncome = data.reduce((sum, d) => sum + (parseFloat(d.totalIncome) || 0), 0);
-      const totalOT = data.reduce((sum, d) => sum + (parseFloat(d.otOPD || 0) + parseFloat(d.otProfessional || 0) + parseFloat(d.otAssistant || 0)), 0);
+      const totalOT = data.reduce((sum, d) => sum + (parseFloat(d.otOPD) || 0), 0);
       const totalP4P = data.reduce((sum, d) => sum + (parseFloat(d.p4p) || 0), 0);
-      const totalShift = data.reduce((sum, d) => sum + (parseFloat(d.shiftProfessional || 0) + parseFloat(d.shiftAssistant || 0)), 0);
+      const totalShift = data.reduce((sum, d) => sum + (parseFloat(d.shiftPay) || 0), 0);
 
       this.state.charts.income = new Chart(incomeCtx, {
         type: 'pie',
@@ -693,8 +659,8 @@ const PayrollDashboard = {
 
     // --- กราฟเส้น/แท่งที่มี Scrollbar (ถ้าข้อมูลเยอะ) ---
     const chartConfigs = [
-      { id: 'otChart', key: 'ot', label: 'ค่า OT รวม', color: '#7c3aed', bgColor: 'rgba(139, 92, 246, 0.1)', dataKey: (d) => (d.otOPD || 0) + (d.otProfessional || 0) + (d.otAssistant || 0) },
-      { id: 'shiftChart', key: 'shift', label: 'ค่าเวรรวม', color: '#d97706', bgColor: 'rgba(245, 158, 11, 0.1)', dataKey: (d) => (d.shiftProfessional || 0) + (d.shiftAssistant || 0) },
+      { id: 'otChart', key: 'ot', label: 'ค่า OT', color: '#7c3aed', bgColor: 'rgba(139, 92, 246, 0.1)', dataKey: (d) => d.otOPD || 0 },
+      { id: 'shiftChart', key: 'shift', label: 'ค่าเวร', color: '#d97706', bgColor: 'rgba(245, 158, 11, 0.1)', dataKey: (d) => d.shiftPay || 0 },
       { id: 'p4pChart', key: 'p4p', label: 'P4P', color: '#059669', bgColor: 'rgba(16, 185, 129, 0.1)', dataKey: (d) => d.p4p || 0 }
     ];
 
@@ -802,177 +768,6 @@ const PayrollDashboard = {
     });
   },
 
-  // ฟังก์ชันอัปเดตกราฟ (ตอนกดปุ่มสลับ รวม/แยก)
-  updateChart(chartName, mode) {
-    const data = this.state.processedData;
-    const labels = data.map(d => d.label);
-    const chartType = this.state.filterMode === 'yearRange' ? 'line' : 'bar';
-    const dynamicWidth = this.calculateChartWidth(data.length, chartType);
-
-    const canvas = document.getElementById(chartName === 'ot' ? 'otChart' : 'shiftChart');
-    if (!canvas) return;
-
-    // ล้างกราฟเก่า
-    if (this.state.charts[chartName]) this.state.charts[chartName].destroy();
-
-    // อัปเดต wrapper width (ถ้ามี)
-    const wrapper = canvas.closest('.chart-wrapper');
-    if (wrapper && dynamicWidth !== '100%') {
-      wrapper.style.width = `${dynamicWidth}px`;
-    }
-
-    const isLineChart = chartType === 'line';
-    let datasets = [];
-    
-    if (chartName === 'ot') {
-      if (mode === 'combined') {
-        const barColors = !isLineChart ? this.generateGradientColors('#7c3aed', data.length) : null;
-        datasets = [{
-          label: 'ค่า OT รวม',
-          data: data.map(d => (d.otOPD || 0) + (d.otProfessional || 0) + (d.otAssistant || 0)),
-          borderColor: '#7c3aed',
-          backgroundColor: isLineChart ? 'rgba(139, 92, 246, 0.1)' : barColors,
-          fill: isLineChart,
-          tension: isLineChart ? 0.4 : 0,
-          borderWidth: isLineChart ? 3 : 0,
-          pointRadius: isLineChart ? 5 : 0,
-          pointHoverRadius: isLineChart ? 7 : 0,
-          borderRadius: isLineChart ? 0 : 6
-        }];
-      } else {
-        datasets = [
-          {
-            label: 'OT/OPD',
-            data: data.map(d => d.otOPD || 0),
-            borderColor: '#7c3aed',
-            backgroundColor: isLineChart ? 'rgba(124, 58, 237, 0.1)' : '#7c3aed',
-            fill: isLineChart,
-            tension: isLineChart ? 0.4 : 0,
-            borderWidth: isLineChart ? 2 : 0,
-            pointRadius: isLineChart ? 4 : 0,
-            pointHoverRadius: isLineChart ? 6 : 0,
-            borderRadius: isLineChart ? 0 : 4
-          },
-          {
-            label: 'OT/พบ.',
-            data: data.map(d => d.otProfessional || 0),
-            borderColor: '#a78bfa',
-            backgroundColor: isLineChart ? 'rgba(167, 139, 250, 0.1)' : '#a78bfa',
-            fill: isLineChart,
-            tension: isLineChart ? 0.4 : 0,
-            borderWidth: isLineChart ? 2 : 0,
-            pointRadius: isLineChart ? 4 : 0,
-            pointHoverRadius: isLineChart ? 6 : 0,
-            borderRadius: isLineChart ? 0 : 4
-          },
-          {
-            label: 'OT/ผช.',
-            data: data.map(d => d.otAssistant || 0),
-            borderColor: '#c4b5fd',
-            backgroundColor: isLineChart ? 'rgba(196, 181, 253, 0.1)' : '#c4b5fd',
-            fill: isLineChart,
-            tension: isLineChart ? 0.4 : 0,
-            borderWidth: isLineChart ? 2 : 0,
-            pointRadius: isLineChart ? 4 : 0,
-            pointHoverRadius: isLineChart ? 6 : 0,
-            borderRadius: isLineChart ? 0 : 4
-          }
-        ];
-      }
-    } else if (chartName === 'shift') {
-      if (mode === 'combined') {
-        const barColors = !isLineChart ? this.generateGradientColors('#d97706', data.length) : null;
-        datasets = [{
-          label: 'ค่าเวรรวม',
-          data: data.map(d => (d.shiftProfessional || 0) + (d.shiftAssistant || 0)),
-          borderColor: '#d97706',
-          backgroundColor: isLineChart ? 'rgba(245, 158, 11, 0.1)' : barColors,
-          fill: isLineChart,
-          tension: isLineChart ? 0.4 : 0,
-          borderWidth: isLineChart ? 3 : 0,
-          pointRadius: isLineChart ? 5 : 0,
-          pointHoverRadius: isLineChart ? 7 : 0,
-          borderRadius: isLineChart ? 0 : 6
-        }];
-      } else {
-        datasets = [
-          {
-            label: 'บ-ด/พบ.',
-            data: data.map(d => d.shiftProfessional || 0),
-            borderColor: '#d97706',
-            backgroundColor: isLineChart ? 'rgba(217, 119, 6, 0.1)' : '#d97706',
-            fill: isLineChart,
-            tension: isLineChart ? 0.4 : 0,
-            borderWidth: isLineChart ? 2 : 0,
-            pointRadius: isLineChart ? 4 : 0,
-            pointHoverRadius: isLineChart ? 6 : 0,
-            borderRadius: isLineChart ? 0 : 4
-          },
-          {
-            label: 'บ-ด/ผช.',
-            data: data.map(d => d.shiftAssistant || 0),
-            borderColor: '#fbbf24',
-            backgroundColor: isLineChart ? 'rgba(251, 191, 36, 0.1)' : '#fbbf24',
-            fill: isLineChart,
-            tension: isLineChart ? 0.4 : 0,
-            borderWidth: isLineChart ? 2 : 0,
-            pointRadius: isLineChart ? 4 : 0,
-            pointHoverRadius: isLineChart ? 6 : 0,
-            borderRadius: isLineChart ? 0 : 4
-          }
-        ];
-      }
-    }
-
-    this.state.charts[chartName] = new Chart(canvas, {
-      type: chartType,
-      data: { labels, datasets },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { 
-          legend: { 
-            display: false
-          } 
-        },
-        scales: {
-          y: { 
-            beginAtZero: true, 
-            ticks: { 
-              callback: v => '฿' + v.toLocaleString(),
-              font: { size: 12 }
-            },
-            grid: {
-              color: 'rgba(0, 0, 0, 0.05)'
-            }
-          },
-          x: { 
-            ticks: { 
-              maxRotation: isLineChart ? 0 : 45, 
-              minRotation: isLineChart ? 0 : 45, 
-              font: { size: isLineChart ? 13 : 10, weight: isLineChart ? '600' : '500' }
-            },
-            grid: {
-              display: false
-            }
-          }
-        }
-      }
-    });
-    
-    // อัปเดต custom legend
-    const legendId = chartName === 'ot' ? 'otLegend' : 'shiftLegend';
-    const legendContainer = document.getElementById(legendId);
-    if (legendContainer) {
-      legendContainer.innerHTML = datasets.map(ds => `
-        <div class="legend-item">
-          <span class="legend-color" style="background-color: ${ds.borderColor}"></span>
-          <span class="legend-label">${ds.label}</span>
-        </div>
-      `).join('');
-    }
-  },
-
   setupEventListeners() {
     const yearRangeModeBtn = document.getElementById('yearRangeMode');
     const singleYearModeBtn = document.getElementById('singleYearMode');
@@ -1009,21 +804,6 @@ const PayrollDashboard = {
 
     yearRangeModeBtn.addEventListener('click', () => switchMode('yearRange'));
     singleYearModeBtn.addEventListener('click', () => switchMode('singleYear'));
-
-    // Toggle buttons for OT and Shift
-    const toggleButtons = document.querySelectorAll('.toggle-btn');
-    toggleButtons.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const chartName = e.target.dataset.chart;
-        const mode = e.target.dataset.mode;
-
-        const siblings = e.target.parentElement.querySelectorAll('.toggle-btn');
-        siblings.forEach(s => s.classList.remove('active'));
-        e.target.classList.add('active');
-
-        this.updateChart(chartName, mode);
-      });
-    });
 
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {

@@ -88,7 +88,12 @@ $GLOBALS['COLUMN_MAP'] = array(
     'บ-ด/พบ.' => 'shift_professional',
     'บ-ด/ผช.' => 'shift_assistant',
 
-    'อื่นๆ' => 'other_income',
+    'อื่นๆ (จ่าย)' => 'shift_assistant',
+    'อื่นๆ (รับ)' => 'other_income',
+    'อื่นๆ จ่าย' => 'shift_assistant',
+    'อื่นๆ รับ' => 'other_income',
+    'อื่นๆจ่าย' => 'shift_assistant',
+    'อื่นๆรับ' => 'other_income',
 
     // ===== รายจ่าย =====
     'หักวันลา' => 'leave_day_deduction',

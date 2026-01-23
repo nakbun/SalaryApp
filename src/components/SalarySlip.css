@@ -130,8 +130,8 @@ body {
     display: grid;
     grid-template-columns: 55px 1fr auto;
     gap: 10px;
-    padding-bottom: 10px;
-    margin-bottom: 12px;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
     border-bottom: 2px solid #000;
     align-items: start;
 }
@@ -150,21 +150,21 @@ body {
     grid-column: 2;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
 }
 
 .header-text h3 {
     font-size: 15px;
     margin: 0;
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.2;
     color: #000;
 }
 
 .header-text p {
     font-size: 13px;
     margin: 0;
-    line-height: 1.4;
+    line-height: 1.3;
     color: #000;
 }
 
@@ -172,7 +172,7 @@ body {
     grid-column: 3;
     text-align: right;
     font-size: 12px;
-    line-height: 1.4;
+    line-height: 1.3;
     color: #000;
 }
 
@@ -186,32 +186,32 @@ body {
     font-size: 12px;
     table-layout: fixed;
     color: #000;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .slip-table thead th {
     border: 1px solid #000;
-    padding: 6px 5px;
+    padding: 4px 4px;
     background: #f5f5f5;
     font-weight: 700;
     text-align: center;
     font-size: 12px;
-    line-height: 1.3;
+    line-height: 1.2;
 }
 
 .slip-table .main-header th {
     font-size: 13px;
-    padding: 8px;
+    padding: 5px;
 }
 
 .slip-table tbody td {
     border: 1px solid #000;
-    padding: 4px 6px;
+    padding: 2px 4px;
     height: auto;
-    min-height: 24px;
+    min-height: 18px;
     font-size: 11px;
     vertical-align: middle;
-    line-height: 1.3;
+    line-height: 1.2;
 }
 
 .slip-table .seq {
@@ -236,7 +236,7 @@ body {
 
 .slip-table tfoot td {
     border: 1px solid #000;
-    padding: 6px 6px;
+    padding: 5px 6px;
     background: #f5f5f5;
     font-weight: 700;
     font-size: 12px;
@@ -252,17 +252,17 @@ body {
     background: #e5e7eb;
     text-align: right;
     font-size: 13px;
-    padding: 8px 6px;
+    padding: 6px 6px;
     border-top: 2px solid #000;
 }
 
 .bottom-section {
     display: block;
-    margin-top: 12px;
-    padding-top: 12px;
+    margin-top: 10px;
+    padding-top: 10px;
     border-top: 1px solid #ddd;
     position: relative;
-    min-height: 140px;
+    min-height: 120px;
 }
 
 .notes-box {
@@ -272,7 +272,7 @@ body {
 
 .notes-title {
     font-size: 11px;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     text-align: center;
     color: #000;
     font-weight: 600;
@@ -288,7 +288,7 @@ body {
 .notes-table th,
 .notes-table td {
     border: 1px solid #000;
-    padding: 4px 5px;
+    padding: 3px 4px;
     text-align: center;
 }
 
@@ -308,21 +308,21 @@ body {
 }
 
 .rights-info {
-    margin-top: 6px;
+    margin-top: 5px;
     font-size: 9px;
-    line-height: 1.5;
+    line-height: 1.4;
     text-align: left;
 }
 
 .rights-info p {
-    margin: 3px 0;
+    margin: 2px 0;
 }
 
 .signature-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 60px;
+    margin-top: 25px;
     clear: both;
 }
 
@@ -342,7 +342,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     position: relative;
 }
 
@@ -369,15 +369,15 @@ body {
 }
 
 .signature-image-inline {
-    height: 50px;
+    height: 45px;
     width: auto;
     object-fit: contain;
-    margin-top: -35px;
+    margin-top: -30px;
 }
 
 .sig-name-center {
     font-weight: bold;
-    margin: 5px 0 2px 0 !important;
+    margin: 4px 0 2px 0 !important;
 }
 
 .sig-position-center {
@@ -390,7 +390,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .sig-label {
@@ -407,8 +407,8 @@ body {
 }
 
 .signature-image-inline {
-    height: 45px;
-    max-width: 140px;
+    height: 40px;
+    max-width: 130px;
     object-fit: contain;
     display: inline-block;
     vertical-align: middle;
@@ -416,21 +416,21 @@ body {
 
 .sig-name-center {
     font-size: 13px !important;
-    margin: 4px 0 !important;
+    margin: 3px 0 !important;
     font-weight: 500;
     text-align: center !important;
 }
 
 .sig-position-center {
     font-size: 12px !important;
-    margin: 4px 0 !important;
+    margin: 3px 0 !important;
     font-weight: 400;
     text-align: center !important;
 }
 
 .sig-role-center {
     font-size: 12px !important;
-    margin: 6px 0 2px 0 !important;
+    margin: 5px 0 2px 0 !important;
     font-weight: 400;
     text-align: center;
 }
@@ -548,8 +548,8 @@ body {
 }
 
 #modal-slip-wrapper .slip-header {
-    margin-bottom: 3mm;
-    padding-bottom: 2mm;
+    margin-bottom: 2mm;
+    padding-bottom: 1.5mm;
 }
 
 #modal-slip-wrapper .logo-slip {
@@ -570,7 +570,7 @@ body {
 
 #modal-slip-wrapper .slip-table {
     font-size: 13px;
-    margin-bottom: 4mm;
+    margin-bottom: 3mm;
 }
 
 #modal-slip-wrapper .slip-table .label {
@@ -583,13 +583,13 @@ body {
 
 #modal-slip-wrapper .slip-table tbody td {
     font-size: 12px;
-    padding: 2mm 2mm;
-    min-height: 7mm;
+    padding: 1.5mm 1.5mm;
+    min-height: 6mm;
 }
 
 #modal-slip-wrapper .slip-table .main-header th {
     font-size: 14px;
-    padding: 2mm;
+    padding: 1.5mm;
 }
 
 #modal-slip-wrapper .slip-table .total-row td {
@@ -598,18 +598,18 @@ body {
 
 #modal-slip-wrapper .slip-table tfoot td {
     font-size: 13px;
-    padding: 2.5mm 2mm;
+    padding: 2mm 1.5mm;
 }
 
 #modal-slip-wrapper .slip-table .net-row td {
     font-size: 14px;
     font-weight: 800;
-    padding: 3mm 2mm;
+    padding: 2.5mm 1.5mm;
 }
 
 #modal-slip-wrapper .bottom-section {
-    margin-top: 3mm;
-    padding-top: 3mm;
+    margin-top: 2.5mm;
+    padding-top: 2.5mm;
 }
 
 #modal-slip-wrapper .notes-box {
@@ -627,19 +627,19 @@ body {
 
 #modal-slip-wrapper .notes-table th,
 #modal-slip-wrapper .notes-table td {
-    padding: 2mm 2mm;
+    padding: 1.5mm 1.5mm;
 }
 
 #modal-slip-wrapper .rights-info {
     font-size: 10px;
-    margin-top: 2mm;
+    margin-top: 1.5mm;
 }
 
 #modal-slip-wrapper .signature-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 8mm;
+    margin-top: 6mm;
     clear: both;
 }
 
@@ -659,23 +659,23 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 3mm;
-    margin-bottom: 2mm;
+    gap: 2.5mm;
+    margin-bottom: 1.5mm;
     position: relative;
 }
 
 #modal-slip-wrapper .sig-role-inline {
     position: absolute;
     left: 100%;
-    margin-left: 3mm;
+    margin-left: 2.5mm;
     white-space: nowrap;
     font-size: 13px;
     font-weight: 500;
 }
 
 #modal-slip-wrapper .signature-box {
-    padding: 4mm 8mm;
-    min-width: 60mm;
+    padding: 3mm 7mm;
+    min-width: 55mm;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -683,8 +683,8 @@ body {
 
 #modal-slip-wrapper .signature-box p {
     font-size: 12px;
-    line-height: 1.6;
-    margin: 1mm 0;
+    line-height: 1.5;
+    margin: 0.8mm 0;
     text-align: left;
     width: auto;
 }
@@ -693,8 +693,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 3mm;
-    margin-bottom: 2mm;
+    gap: 2.5mm;
+    margin-bottom: 1.5mm;
 }
 
 #modal-slip-wrapper .sig-label {
@@ -703,34 +703,34 @@ body {
 }
 
 #modal-slip-wrapper .signature-image-inline {
-    height: 13mm;
-    max-width: 40mm;
+    height: 12mm;
+    max-width: 38mm;
 }
 
 #modal-slip-wrapper .sig-name-center {
     font-size: 13px !important;
     font-weight: 500;
-    margin: 1.5mm 0 !important;
+    margin: 1.2mm 0 !important;
     text-align: center !important;
 }
 
 #modal-slip-wrapper .sig-position-center {
     font-size: 12px !important;
     font-weight: 400;
-    margin: 1mm 0 !important;
+    margin: 0.8mm 0 !important;
     text-align: center !important;
 }
 
 #modal-slip-wrapper .sig-role-center {
     font-size: 12px !important;
     font-weight: 400;
-    margin: 2mm 0 1mm 0 !important;
+    margin: 1.5mm 0 0.8mm 0 !important;
 }
 
 #modal-slip-wrapper .sig-dept-center {
     font-size: 12px !important;
     font-weight: 400;
-    margin: 1mm 0 !important;
+    margin: 0.8mm 0 !important;
 }
 
 .slip-modal-close-btn {
@@ -760,7 +760,7 @@ body {
 @media print {
     @page {
         size: A4 portrait;
-        margin: 8mm 10mm;
+        margin: 6mm 8mm 6mm 8mm;
     }
 
     body,
@@ -794,7 +794,7 @@ body {
     }
 
     .print-page:not(:first-child) .slip-card {
-        margin-top: 3mm;
+        margin-top: 6mm;
     }
 
     .slip-card {
@@ -809,103 +809,103 @@ body {
     }
 
     .slip-header {
-        margin-bottom: 3mm;
-        padding-bottom: 2mm;
+        margin-bottom: 2mm;
+        padding-bottom: 1.5mm;
     }
 
     .logo-slip {
-        width: 16mm;
+        width: 15mm;
     }
 
     .header-text h3 {
-        font-size: 16px;
+        font-size: 17px;
     }
 
     .header-text p {
-        font-size: 14px;
+        font-size: 15px;
     }
 
     .header-info {
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .slip-table {
-        font-size: 13px;
-        margin-bottom: 4mm;
+        font-size: 14px;
+        margin-bottom: 3mm;
     }
 
     .slip-table .label {
-        font-size: 12px;
+        font-size: 14px;
     }
 
     .slip-table .amount {
-        font-size: 13px;
+        font-size: 12px;
     }
 
     .slip-table tbody td {
-        font-size: 12px;
+        font-size: 13px;
     }
 
     .slip-table .main-header th {
-        font-size: 14px;
-        padding: 2mm;
+        font-size: 15px;
+        padding: 1.5mm;
     }
 
     .slip-table tbody td {
-        font-size: 12px;
-        padding: 2mm 2mm;
-        min-height: 7mm;
+        font-size: 13px;
+        padding: 1.2mm 1.5mm;
+        min-height: 5.5mm;
     }
 
     .slip-table .total-row td {
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .slip-table tfoot td {
-        font-size: 13px;
-        padding: 2.5mm 2mm;
+        font-size: 14px;
+        padding: 2mm 1.5mm;
     }
 
     .slip-table .net-row td {
-        font-size: 14px;
+        font-size: 15px;
         font-weight: 800;
-        padding: 3mm 2mm;
+        padding: 2.5mm 1.5mm;
     }
 
     .bottom-section {
-        margin-top: 3mm;
-        padding-top: 3mm;
-        min-height: 35mm;
+        margin-top: 2.5mm;
+        padding-top: 2.5mm;
+        min-height: 30mm;
     }
 
     .notes-box {
         float: left;
-        max-width: 100mm;
+        max-width: 95mm;
     }
 
     .notes-title {
-        font-size: 12px;
+        font-size: 13px;
     }
 
     .notes-table {
-        font-size: 11px;
+        font-size: 12px;
     }
 
     .notes-table th,
     .notes-table td {
-        padding: 2mm 2mm;
+        padding: 1.5mm 1.5mm;
     }
 
     .rights-info {
-        font-size: 10px;
-        margin-top: 2mm;
+        font-size: 11px;
+        margin-top: 1.5mm;
     }
 
     .signature-wrapper {
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-top: 8mm;
+        margin-top: 55mm;
         clear: both;
     }
 
@@ -925,74 +925,74 @@ body {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 3mm;
-        margin-bottom: 2mm;
+        gap: 2.5mm;
+        margin-bottom: 1.5mm;
         position: relative;
     }
 
     .sig-role-inline {
         position: absolute;
         left: 100%;
-        margin-left: 3mm;
+        margin-left: 2.5mm;
         white-space: nowrap;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 500;
     }
 
     .signature-box {
-        padding: 4mm 8mm;
-        min-width: 60mm;
+        padding: 3mm 7mm;
+        min-width: 55mm;
         display: flex;
         flex-direction: column;
         align-items: flex-start;
     }
 
     .signature-box p {
-        font-size: 12px;
-        line-height: 1.6;
-        margin: 1mm 0;
+        font-size: 13px;
+        line-height: 1.5;
+        margin: 0.8mm 0;
         text-align: left;
         width: auto;
     }
 
     .sig-line {
-        margin-bottom: 2mm;
-        gap: 3mm;
+        margin-bottom: 1.5mm;
+        gap: 2.5mm;
     }
 
     .sig-label {
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 500;
     }
 
     .signature-image-inline {
-        height: 13mm;
-        max-width: 40mm;
+        height: 12mm;
+        max-width: 38mm;
     }
 
     .sig-name-center {
-        font-size: 13px !important;
-        margin: 1.5mm 0 !important;
+        font-size: 14px !important;
+        margin: 1.2mm 0 !important;
         font-weight: 500;
         text-align: center !important;
     }
 
     .sig-position-center {
-        font-size: 12px !important;
-        margin: 1mm 0 !important;
+        font-size: 13px !important;
+        margin: 0.8mm 0 !important;
         font-weight: 400;
         text-align: center !important;
     }
 
     .sig-role-center {
-        font-size: 12px !important;
-        margin: 2mm 0 1mm 0 !important;
+        font-size: 13px !important;
+        margin: 1.5mm 0 0.8mm 0 !important;
         font-weight: 400;
     }
 
     .sig-dept-center {
-        font-size: 12px !important;
-        margin: 1mm 0 !important;
+        font-size: 13px !important;
+        margin: 0.8mm 0 !important;
         font-weight: 400;
     }
 

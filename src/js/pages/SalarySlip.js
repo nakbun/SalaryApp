@@ -158,7 +158,7 @@ function processEmployeeForSlip(emp) {
     const incomes = [
         { label: 'เงินเดือน', value: parseFloat(emp.salary || 0) },
         { label: 'เงินเดือน (ตกเบิก)', value: parseFloat(emp.retroactive_salary_emp || 0) },
-        { label: 'เงินเดือนสุทธิ', value: parseFloat(emp.salary_deductions || 0) },
+        // { label: 'เงินเดือนสุทธิ', value: parseFloat(emp.salary_deductions || 0) },
         { label: 'เงินประจำตำแหน่ง', value: parseFloat(emp.ot_professional || 0) },
         { label: 'ค่าตอบแทน พตส.', value: parseFloat(emp.special_public_health_allowance || 0) },
         { label: 'ค่าตอบแทนไม่ปฏิบัติเวชส่วนตัว', value: parseFloat(emp.cola_allowance || 0) },
@@ -187,7 +187,7 @@ function processEmployeeForSlip(emp) {
         { label: 'ค่าอินเตอร์เน็ต', value: parseFloat(emp.internet_deduction_emp || 0) },
         { label: 'ค่าประกัน AIA', value: parseFloat(emp.aia_insurance_deduction_emp || 0) },
         { label: 'กยศ.', value: parseFloat(emp.student_loan_deduction_emp || 0) },
-        { label: 'เงินกู้ รพ/ประกันงาน', value: parseFloat(emp.student_loan_deduction_emp || 0) },
+        { label: 'เงินกู้ รพ/ประกันงาน', value: parseFloat(emp.hospital_loan_deduction || 0) },
         { label: 'อื่นๆ', value: parseFloat(emp.shift_assistant || 0) }
     ];
 
@@ -294,14 +294,19 @@ function createSlipCard(employee, index, showExpandButton) {
         const income = employee.incomes[i];
         const expense = employee.expenses[i];
 
+        // ถ้ามีรายการแต่ไม่มีจำนวนเงิน แสดง "-"
+        // ถ้าไม่มีรายการเลย แสดงค่าว่าง
+        const incomeAmount = income ? (income.value > 0 ? formatCurrency(income.value) : '-') : '';
+        const expenseAmount = expense ? (expense.value > 0 ? formatCurrency(expense.value) : '-') : '';
+
         rows += `
             <tr>
                 <td class="seq">${income ? (i + 1) : ''}</td>
                 <td class="label">${income ? income.label : ''}</td>
-                <td class="amount">${income && income.value > 0 ? formatCurrency(income.value) : '-'}</td>
+                <td class="amount">${incomeAmount}</td>
                 <td class="seq">${expense ? (i + 1) : ''}</td>
                 <td class="label">${expense ? expense.label : ''}</td>
-                <td class="amount">${expense && expense.value > 0 ? formatCurrency(expense.value) : '-'}</td>
+                <td class="amount">${expenseAmount}</td>
             </tr>
         `;
     }
